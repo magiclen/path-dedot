@@ -18,7 +18,7 @@ lazy_static! {
     };
 }
 
-/// Make `Path` and `PathBuf` can use `parse_dot` method.
+/// Make `Path` and `PathBuf` have `parse_dot` method.
 pub trait ParseDot {
     /// Remove dots in the path and create a new `PathBuf` instance.
     ///
