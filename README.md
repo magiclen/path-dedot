@@ -1,7 +1,7 @@
 Path Dedot
 ====================
 
-A library for extending `Path` and `PathBuf` in order to parse the path which contains dots.
+This is a library for extending `Path` and `PathBuf` in order to parse the path which contains dots.
 
 Please read the following examples to know the parsing rules.
 

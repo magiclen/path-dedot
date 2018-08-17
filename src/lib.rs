@@ -12,7 +12,7 @@ lazy_static! {
         env::current_dir().unwrap()
     };
 
-    /// THe main separator for the target OS.
+    /// The main separator for the target OS.
     pub static ref MAIN_SEPARATOR: OsString = {
         OsString::from(path::MAIN_SEPARATOR.to_string())
     };
