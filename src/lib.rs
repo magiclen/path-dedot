@@ -295,15 +295,15 @@ impl ParseDot for Path {
 
         if len > 0 {
             let first_token = tokens[0];
+            println!("first_token = {:?}", first_token);
             path.push(first_token);
 
             if len > 1 {
                 if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
                     match self.get_path_prefix() {
                         Some(prefix) => {
+                            println!("prefix = {:?}", prefix);
                             if !first_token.eq(prefix.as_os_str()) {
-                                eprintln!("prefix = {:?}", prefix);
-                                eprintln!("first_token = {:?}", first_token);
                                 path.push(MAIN_SEPARATOR.as_os_str());
                             }
                         }
@@ -314,6 +314,8 @@ impl ParseDot for Path {
                 }
 
                 for &token in tokens.iter().skip(1).take(len - 2) {
+                    println!("token = {:?}", token);
+
                     path.push(token);
 
                     path.push(MAIN_SEPARATOR.as_os_str());
