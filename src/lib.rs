@@ -302,8 +302,8 @@ impl ParseDot for Path {
                     match self.get_path_prefix() {
                         Some(prefix) => {
                             if !first_token.eq(prefix.as_os_str()) {
-                                println!("prefix = {:?}", prefix);
-                                println!("first_token = {:?}", first_token);
+                                eprintln!("prefix = {:?}", prefix);
+                                eprintln!("first_token = {:?}", first_token);
                                 path.push(MAIN_SEPARATOR.as_os_str());
                             }
                         }
