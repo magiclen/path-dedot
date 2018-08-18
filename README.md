@@ -70,7 +70,7 @@ let p = Path::new("/path/to/../123/456/./777/..");
 assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 ```
 
-You should notice that `parse_dot` method does **not** aim to get an **absolute path**. For those paths which do not start with **/**, **Single Dot** and **Double Dots** are still do not have each of them after the `parse_dot` method is used.
+You should notice that `parse_dot` method does **not** aim to get an **absolute path**. A path which does not start with a `MAIN_SEPARATOR`, **Single Dot** and **Double Dots**, will not have each of them after the `parse_dot` method is used.
 
 ```rust
 extern crate path_dedot;
@@ -120,7 +120,7 @@ https://docs.rs/path-dedot
 
 ## About Windows
 
-For people who develop Rust programs on Windows, this crate may not suitable for you because I don't have Windows to test it. However, you can always contribute your code if you like to make it windows supported.
+For people who develop Rust programs on Windows, this crate may not suitable because I don't have Windows to test it. However, you can always contribute your code if you like to make it windows supported.
 
 ## License
 
