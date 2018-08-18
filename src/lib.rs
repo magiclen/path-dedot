@@ -308,7 +308,7 @@ impl ParseDot for Path {
                     let len = tokens.len();
 
                     if let Some(_) = prefix {
-                        if len > 2 {
+                        if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
                             tokens.remove(len - 1);
                         }
                     } else {
