@@ -426,7 +426,7 @@ mod tests {
 
         match cwd_parent {
             Some(cwd_parent) => {
-                assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+                assert_eq!(Path::join(&cwd_parent, Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
             None => {
                 assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
