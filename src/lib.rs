@@ -89,7 +89,7 @@ pub trait ParseDot {
     /// assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
     /// ```
     ///
-    /// You should notice that `parse_dot` method does **not** aim to get an **absolute path**. For those paths which do not start with **/**, **Single Dot** and **Double Dots** are still do not have each of them after the `parse_dot` method is used.
+    /// You should notice that `parse_dot` method does **not** aim to get an **absolute path**. For those paths which do not start with a `MAIN_SEPARATOR`, **Single Dot** and **Double Dots** are still do not have each of them after the `parse_dot` method is used.
     ///
     /// ```
     /// extern crate path_dedot;
