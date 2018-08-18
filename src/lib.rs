@@ -197,33 +197,41 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut tokens = Vec::new();
 
-        for (index, token) in self.iter().enumerate() {
-            if token.eq(".") {
-                if index == 0 {
-                    for token in CWD.iter() {
-                        tokens.push(token);
-                    }
-                }
-            } else if token.eq("..") {
-                let len = tokens.len();
-                if index == 0 {
-                    let cwd_parent = CWD.parent();
+        let mut iter = self.iter();
 
-                    match cwd_parent {
-                        Some(cwd_parent) => {
-                            for token in cwd_parent.iter() {
-                                tokens.push(token);
-                            }
-                        }
-                        None => {
-                            tokens.push(MAIN_SEPARATOR.as_os_str());
+        if let Some(first_token) = iter.next() {
+            if first_token.eq(".") {
+                for token in CWD.iter() {
+                    tokens.push(token);
+                }
+            } else if first_token.eq("..") {
+                let cwd_parent = CWD.parent();
+
+                match cwd_parent {
+                    Some(cwd_parent) => {
+                        for token in cwd_parent.iter() {
+                            tokens.push(token);
                         }
                     }
-                } else if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                    tokens.remove(len - 1);
+                    None => {
+                        tokens.push(MAIN_SEPARATOR.as_os_str());
+                    }
                 }
             } else {
-                tokens.push(token);
+                tokens.push(first_token);
+            }
+
+            for token in iter {
+                if token.eq(".") {
+                    continue;
+                } else if token.eq("..") {
+                    let len = tokens.len();
+                    if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                        tokens.remove(len - 1);
+                    }
+                } else {
+                    tokens.push(token);
+                }
             }
         }
 
@@ -259,33 +267,41 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut tokens = Vec::new();
 
-        for (index, token) in self.iter().enumerate() {
-            if token.eq(".") {
-                if index == 0 {
-                    for token in CWD.iter() {
-                        tokens.push(token);
-                    }
-                }
-            } else if token.eq("..") {
-                let len = tokens.len();
-                if index == 0 {
-                    let cwd_parent = CWD.parent();
+        let mut iter = self.iter();
 
-                    match cwd_parent {
-                        Some(cwd_parent) => {
-                            for token in cwd_parent.iter() {
-                                tokens.push(token);
-                            }
-                        }
-                        None => {
-                            tokens.push(MAIN_SEPARATOR.as_os_str());
+        if let Some(first_token) = iter.next() {
+            if first_token.eq(".") {
+                for token in CWD.iter() {
+                    tokens.push(token);
+                }
+            } else if first_token.eq("..") {
+                let cwd_parent = CWD.parent();
+
+                match cwd_parent {
+                    Some(cwd_parent) => {
+                        for token in cwd_parent.iter() {
+                            tokens.push(token);
                         }
                     }
-                } else if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                    tokens.remove(len - 1);
+                    None => {
+                        tokens.push(MAIN_SEPARATOR.as_os_str());
+                    }
                 }
             } else {
-                tokens.push(token);
+                tokens.push(first_token);
+            }
+
+            for token in iter {
+                if token.eq(".") {
+                    continue;
+                } else if token.eq("..") {
+                    let len = tokens.len();
+                    if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                        tokens.remove(len - 1);
+                    }
+                } else {
+                    tokens.push(token);
+                }
             }
         }
 
@@ -295,27 +311,14 @@ impl ParseDot for Path {
 
         if len > 0 {
             let first_token = tokens[0];
-            println!("first_token = {:?}", first_token);
             path.push(first_token);
 
             if len > 1 {
                 if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
-                    match self.get_path_prefix() {
-                        Some(prefix) => {
-                            println!("prefix = {:?}", prefix);
-                            if !first_token.eq(prefix.as_os_str()) {
-                                path.push(MAIN_SEPARATOR.as_os_str());
-                            }
-                        }
-                        None => {
-                            path.push(MAIN_SEPARATOR.as_os_str());
-                        }
-                    };
+                    path.push(MAIN_SEPARATOR.as_os_str());
                 }
 
                 for &token in tokens.iter().skip(1).take(len - 2) {
-                    println!("token = {:?}", token);
-
                     path.push(token);
 
                     path.push(MAIN_SEPARATOR.as_os_str());
