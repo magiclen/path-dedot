@@ -322,9 +322,6 @@ impl ParseDot for Path {
             }
         }
 
-        println!("prefix = {:?}", prefix);
-        println!("tokens = {:?}", tokens);
-
         let mut path = OsString::new();
 
         let len = tokens.len();
