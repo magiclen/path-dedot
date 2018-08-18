@@ -336,16 +336,28 @@ impl ParseDot for Path {
                 path.push(first_token);
 
                 if len > 1 {
-                    if None == prefix {
+                    if let Some(_) = prefix {
+                        if let Some(second_token) = iter.next() {
+                            if !second_token.eq(&MAIN_SEPARATOR.as_os_str()) {
+                                path.push(MAIN_SEPARATOR.as_os_str());
+                            }
+
+                            for &token in iter.take(len - 3) {
+                                path.push(token);
+
+                                path.push(MAIN_SEPARATOR.as_os_str());
+                            }
+                        }
+                    } else {
                         if !first_token.eq(&MAIN_SEPARATOR.as_os_str()) {
                             path.push(MAIN_SEPARATOR.as_os_str());
                         }
-                    }
 
-                    for &token in iter.take(len - 2) {
-                        path.push(token);
+                        for &token in iter.take(len - 2) {
+                            path.push(token);
 
-                        path.push(MAIN_SEPARATOR.as_os_str());
+                            path.push(MAIN_SEPARATOR.as_os_str());
+                        }
                     }
 
                     path.push(tokens[len - 1]);
