@@ -269,12 +269,18 @@ impl ParseDot for Path {
 
         let mut iter = self.iter();
 
+        let mut prefix = self.get_path_prefix();
+
         if let Some(first_token) = iter.next() {
             if first_token.eq(".") {
+                prefix = CWD.get_path_prefix();
+
                 for token in CWD.iter() {
                     tokens.push(token);
                 }
             } else if first_token.eq("..") {
+                prefix = CWD.get_path_prefix();
+
                 let cwd_parent = CWD.parent();
 
                 match cwd_parent {
@@ -284,6 +290,7 @@ impl ParseDot for Path {
                         }
                     }
                     None => {
+                        tokens.push(prefix.unwrap().as_os_str());
                         tokens.push(MAIN_SEPARATOR.as_os_str());
                     }
                 }
@@ -296,14 +303,24 @@ impl ParseDot for Path {
                     continue;
                 } else if token.eq("..") {
                     let len = tokens.len();
-                    if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                        tokens.remove(len - 1);
+
+                    if let Some(_) = prefix {
+                        if len > 2 {
+                            tokens.remove(len - 1);
+                        }
+                    } else {
+                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                            tokens.remove(len - 1);
+                        }
                     }
                 } else {
                     tokens.push(token);
                 }
             }
         }
+
+        println!("prefix = {:?}", prefix);
+        println!("tokens = {:?}", tokens);
 
         let mut path = OsString::new();
 
