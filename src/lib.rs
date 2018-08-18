@@ -232,7 +232,23 @@ impl ParseDot for PathBuf {
 #[cfg(test)]
 mod tests {
     use std::path::Path;
+    
+    #[cfg(windows)]
+    use std::path::{Component, PrefixComponent};
+
     use super::*;
+
+    #[cfg(windows)]
+    fn get_path_prefix(s: &str) -> Option<PrefixComponent> {
+        let path = Path::new(s);
+
+        let first_component = path.components().next();
+
+        match first_component.unwrap() {
+            Component::Prefix(prefix_component) => Some(prefix_component),
+            _ => None,
+        }
+    }
 
     #[test]
     #[cfg(not(windows))]
@@ -240,6 +256,14 @@ mod tests {
         let p = Path::new("./path/to/123/456");
 
         assert_eq!(Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv0_1() {
+        let p = Path::new(r".\path\to\123\456");
+
+        assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
     }
 
     #[test]
@@ -255,6 +279,23 @@ mod tests {
             }
             None => {
                 assert_eq!(Path::join(Path::new("/"), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv0_2() {
+        let p = Path::new(r"..\path\to\123\456");
+
+        let cwd_parent = CWD.parent();
+
+        match cwd_parent {
+            Some(cwd_parent) => {
+                assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            }
+            None => {
+                assert_eq!(Path::join(Path::new(get_path_prefix(CWD.to_str().unwrap()).unwrap().as_os_str()), Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
         }
     }
