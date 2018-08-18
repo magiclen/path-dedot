@@ -1,6 +1,9 @@
 Path Dedot
 ====================
 
+[![Build Status](https://travis-ci.org/magiclen/path-dedot.svg?branch=master)](https://travis-ci.org/magiclen/path-dedot)
+[![Build status](https://ci.appveyor.com/api/projects/status/g414e2562hkllsnn?svg=true)](https://ci.appveyor.com/project/magiclen/path-dedot)
+
 This is a library for extending `Path` and `PathBuf` in order to parse the path which contains dots.
 
 Please read the following examples to know the parsing rules.
@@ -117,10 +120,6 @@ https://crates.io/crates/path-dedot
 ## Documentation
 
 https://docs.rs/path-dedot
-
-## About Windows
-
-For people who develop Rust programs on Windows, this crate may not be suitable because I don't have Windows to test it. However, you can always contribute your code if you like to make it windows supported.
 
 ## License
 
