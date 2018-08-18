@@ -1,10 +1,13 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::path::{self, Path, PathBuf};
 use std::io;
 use std::env;
 use std::ffi::OsString;
 
-#[macro_use]
-extern crate lazy_static;
+#[cfg(windows)]
+use std::path::{Component, PrefixComponent};
 
 lazy_static! {
     /// Current working directory.
@@ -16,6 +19,36 @@ lazy_static! {
     pub static ref MAIN_SEPARATOR: OsString = {
         OsString::from(path::MAIN_SEPARATOR.to_string())
     };
+}
+
+#[cfg(windows)]
+trait ParsePrefix {
+    #[cfg(windows)]
+    fn get_path_prefix(&self) -> Option<PrefixComponent>;
+}
+
+#[cfg(windows)]
+impl ParsePrefix for Path {
+    fn get_path_prefix(&self) -> Option<PrefixComponent> {
+        let first_component = self.components().next();
+
+        match first_component.unwrap() {
+            Component::Prefix(prefix_component) => Some(prefix_component),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(windows)]
+impl ParsePrefix for PathBuf {
+    fn get_path_prefix(&self) -> Option<PrefixComponent> {
+        let first_component = self.components().next();
+
+        match first_component.unwrap() {
+            Component::Prefix(prefix_component) => Some(prefix_component),
+            _ => None,
+        }
+    }
 }
 
 /// Make `Path` and `PathBuf` have `parse_dot` method.
@@ -159,6 +192,7 @@ pub trait ParseDot {
 }
 
 impl ParseDot for Path {
+    #[cfg(not(windows))]
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut tokens = Vec::new();
 
@@ -219,6 +253,77 @@ impl ParseDot for Path {
 
         Ok(path_buf)
     }
+
+    #[cfg(windows)]
+    fn parse_dot(&self) -> io::Result<PathBuf> {
+        let mut tokens = Vec::new();
+
+        for (index, token) in self.iter().enumerate() {
+            if token.eq(".") {
+                if index == 0 {
+                    for token in CWD.iter() {
+                        tokens.push(token);
+                    }
+                }
+            } else if token.eq("..") {
+                let len = tokens.len();
+                if index == 0 {
+                    let cwd_parent = CWD.parent();
+
+                    match cwd_parent {
+                        Some(cwd_parent) => {
+                            for token in cwd_parent.iter() {
+                                tokens.push(token);
+                            }
+                        }
+                        None => {
+                            tokens.push(MAIN_SEPARATOR.as_os_str());
+                        }
+                    }
+                } else if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                    tokens.remove(len - 1);
+                }
+            } else {
+                tokens.push(token);
+            }
+        }
+
+        let mut path = OsString::new();
+
+        let len = tokens.len();
+
+        if len > 0 {
+            let first_token = tokens[0];
+            path.push(first_token);
+
+            if len > 1 {
+                if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
+                    match self.get_path_prefix() {
+                        Some(prefix) => {
+                            if !first_token.eq(prefix.as_os_str()) {
+                                path.push(MAIN_SEPARATOR.as_os_str());
+                            }
+                        }
+                        None => {
+                            path.push(MAIN_SEPARATOR.as_os_str());
+                        }
+                    };
+                }
+
+                for &token in tokens.iter().skip(1).take(len - 2) {
+                    path.push(token);
+
+                    path.push(MAIN_SEPARATOR.as_os_str());
+                }
+
+                path.push(tokens[len - 1]);
+            }
+        }
+
+        let path_buf = PathBuf::from(&path);
+
+        Ok(path_buf)
+    }
 }
 
 impl ParseDot for PathBuf {
@@ -232,23 +337,8 @@ impl ParseDot for PathBuf {
 #[cfg(test)]
 mod tests {
     use std::path::Path;
-    
-    #[cfg(windows)]
-    use std::path::{Component, PrefixComponent};
 
     use super::*;
-
-    #[cfg(windows)]
-    fn get_path_prefix(s: &str) -> Option<PrefixComponent> {
-        let path = Path::new(s);
-
-        let first_component = path.components().next();
-
-        match first_component.unwrap() {
-            Component::Prefix(prefix_component) => Some(prefix_component),
-            _ => None,
-        }
-    }
 
     #[test]
     #[cfg(not(windows))]
@@ -295,7 +385,7 @@ mod tests {
                 assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
             None => {
-                assert_eq!(Path::join(Path::new(get_path_prefix(CWD.to_str().unwrap()).unwrap().as_os_str()), Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+                assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
         }
     }
