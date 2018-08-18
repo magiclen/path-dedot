@@ -397,7 +397,7 @@ mod tests {
     fn dedot_lv0_1() {
         let p = Path::new(r".\path\to\123\456");
 
-        assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+        assert_eq!(Path::join(&CWD, Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
     }
 
     #[test]
