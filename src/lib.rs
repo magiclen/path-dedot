@@ -432,7 +432,7 @@ mod tests {
                 assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
             None => {
-                assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+                assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
         }
     }
@@ -470,11 +470,27 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
+    fn dedot_lv2() {
+        let p = Path::new(r"\path\to\..\123\456\.\777\..");
+
+        assert_eq!(r"\path\123\456", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
     #[cfg(not(windows))]
     fn dedot_lv3() {
         let p = Path::new("path/to/../123/456/./777/..");
 
         assert_eq!("path/123/456", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv3() {
+        let p = Path::new(r"path\to\..\123\456\.\777\..");
+
+        assert_eq!(r"path\123\456", p.parse_dot().unwrap().to_str().unwrap());
     }
 
     #[test]
@@ -486,10 +502,34 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
+    fn dedot_lv4() {
+        let p = Path::new(r"path\to\..\..\..\..\123\456\.\777\..");
+
+        assert_eq!(r"123\456", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
     #[cfg(not(windows))]
     fn dedot_lv5() {
         let p = Path::new("/path/to/../../../../123/456/./777/..");
 
         assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv5_1() {
+        let p = Path::new(r"\path\to\..\..\..\..\123\456\.\777\..");
+
+        assert_eq!(r"\123\456", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv5_2() {
+        let p = Path::new(r"C:\path\to\..\..\..\..\123\456\.\777\..");
+
+        assert_eq!(r"C:\123\456", p.parse_dot().unwrap().to_str().unwrap());
     }
 }
