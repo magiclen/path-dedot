@@ -338,6 +338,8 @@ impl ParseDot for Path {
                 if len > 1 {
                     if let Some(_) = prefix {
                         if let Some(second_token) = iter.next() {
+                            path.push(second_token);
+
                             if !second_token.eq(&MAIN_SEPARATOR.as_os_str()) {
                                 path.push(MAIN_SEPARATOR.as_os_str());
                             }
@@ -441,6 +443,22 @@ mod tests {
         let p = Path::new("/path/to/../123/456/./777");
 
         assert_eq!("/path/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv1_1() {
+        let p = Path::new(r"\path\to\..\123\456\.\777");
+
+        assert_eq!(r"\path\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn dedot_lv1_2() {
+        let p = Path::new(r"C:\path\to\..\123\456\.\777");
+
+        assert_eq!(r"C:\path\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
     }
 
     #[test]
