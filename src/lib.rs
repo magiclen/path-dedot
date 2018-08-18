@@ -240,21 +240,24 @@ impl ParseDot for Path {
         let len = tokens.len();
 
         if len > 0 {
-            let first_token = tokens[0];
-            path.push(first_token);
+            let mut iter = tokens.iter();
 
-            if len > 1 {
-                if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
-                    path.push(MAIN_SEPARATOR.as_os_str());
+            if let Some(first_token) = iter.next() {
+                path.push(first_token);
+
+                if len > 1 {
+                    if !first_token.eq(&MAIN_SEPARATOR.as_os_str()) {
+                        path.push(MAIN_SEPARATOR.as_os_str());
+                    }
+
+                    for &token in iter.take(len - 2) {
+                        path.push(token);
+
+                        path.push(MAIN_SEPARATOR.as_os_str());
+                    }
+
+                    path.push(tokens[len - 1]);
                 }
-
-                for &token in tokens.iter().skip(1).take(len - 2) {
-                    path.push(token);
-
-                    path.push(MAIN_SEPARATOR.as_os_str());
-                }
-
-                path.push(tokens[len - 1]);
             }
         }
 
@@ -327,21 +330,26 @@ impl ParseDot for Path {
         let len = tokens.len();
 
         if len > 0 {
-            let first_token = tokens[0];
-            path.push(first_token);
+            let mut iter = tokens.iter();
 
-            if len > 1 {
-                if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
-                    path.push(MAIN_SEPARATOR.as_os_str());
+            if let Some(first_token) = iter.next() {
+                path.push(first_token);
+
+                if len > 1 {
+                    if None == prefix {
+                        if !first_token.eq(&MAIN_SEPARATOR.as_os_str()) {
+                            path.push(MAIN_SEPARATOR.as_os_str());
+                        }
+                    }
+
+                    for &token in iter.take(len - 2) {
+                        path.push(token);
+
+                        path.push(MAIN_SEPARATOR.as_os_str());
+                    }
+
+                    path.push(tokens[len - 1]);
                 }
-
-                for &token in tokens.iter().skip(1).take(len - 2) {
-                    path.push(token);
-
-                    path.push(MAIN_SEPARATOR.as_os_str());
-                }
-
-                path.push(tokens[len - 1]);
             }
         }
 
