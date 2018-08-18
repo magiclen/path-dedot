@@ -157,7 +157,7 @@ impl ParseDot for Path {
                             tokens.push(MAIN_SEPARATOR.as_os_str());
                         }
                     }
-                } else if len > 0 && (len != 1 || tokens[0].ne("/")) {
+                } else if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
                     tokens.remove(len - 1);
                 }
             } else {
@@ -174,7 +174,7 @@ impl ParseDot for Path {
             path.push(first_token);
 
             if len > 1 {
-                if !first_token.eq("/") {
+                if !first_token.eq(MAIN_SEPARATOR.as_os_str()) {
                     path.push(MAIN_SEPARATOR.as_os_str());
                 }
 

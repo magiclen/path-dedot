@@ -118,6 +118,10 @@ https://crates.io/crates/path-dedot
 
 https://docs.rs/path-dedot
 
+## About Windows
+
+For people who develop Rust programs on Windows, this crate may not suitable for you because I don't have Windows to test it. However, you can always contribute your code if you like to make it windows supported.
+
 ## License
 
 [MIT](LICENSE)
