@@ -317,16 +317,21 @@ impl ParseDot for Path {
             } else {
                 tokens.push(first_token);
 
-                if prefix.is_some() {
-                    if let Some(second_token) = iter.next() {
-                        println!("second_token={:?}", second_token);
-                        if second_token.eq(".") {
-                            for token in CWD.iter().skip(1) {
-                                tokens.push(token);
-                            }
-                            size += CWD.as_os_str().len() - 1;
-                            size -= CWD.get_path_prefix().unwrap().as_os_str().len();
-                        } else if second_token.eq("..") {
+                if let Some(prefix) = prefix {
+                    // single dot is filtered by the iterator
+                    let path = self.as_os_str().to_str().unwrap();
+
+                    let prefix_len = prefix.as_os_str().len();
+                    let path_len = path.len();
+
+                    if (&path[prefix_len..prefix_len + 1]).eq(".") && (prefix_len + 1 == path_len || (&path[prefix_len + 1..prefix_len + 2]).eq(r"\")) {
+                        for token in CWD.iter().skip(1) {
+                            tokens.push(token);
+                        }
+                        size += CWD.as_os_str().len() - 1;
+                        size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                    } else if let Some(second_token) = iter.next() {
+                        if second_token.eq("..") {
                             let cwd_parent = CWD.parent();
 
                             match cwd_parent {
