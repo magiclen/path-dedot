@@ -319,7 +319,7 @@ impl ParseDot for Path {
 
                 if prefix.is_some() {
                     if let Some(second_token) = iter.next() {
-                        println!("second_token={}", second_token);
+                        println!("second_token={:?}", second_token);
                         if second_token.eq(".") {
                             for token in CWD.iter().skip(1) {
                                 tokens.push(token);
