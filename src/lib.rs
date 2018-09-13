@@ -512,9 +512,11 @@ mod tests {
     #[test]
     #[cfg(windows)]
     #[ignore]
-    // Ignored because the test needs to be run under the drive C
+    // Ignored because it may not be standard
     fn dedot_lv0_3() {
-        let p = Path::new(r"C:.\path\to\123\456");
+        let prefix = CWD.get_path_prefix().unwrap();
+
+        let p = Path::join(Path::new(prefix.as_os_str()), Path::new(r".\path\to\123\456"));
 
         assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
     }
@@ -522,9 +524,11 @@ mod tests {
     #[test]
     #[cfg(windows)]
     #[ignore]
-    // Ignored because the test needs to be run under the drive C
+    // Ignored because it may not be standard
     fn dedot_lv0_4() {
-        let p = Path::new(r"C:..\path\to\123\456");
+        let prefix = CWD.get_path_prefix().unwrap();
+
+        let p = Path::join(Path::new(prefix.as_os_str()), Path::new(r"..\path\to\123\456"));
 
         let cwd_parent = CWD.parent();
 
