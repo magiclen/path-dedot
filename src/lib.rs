@@ -311,79 +311,79 @@ impl ParseDot for Path {
                         let prefix = prefix.unwrap().as_os_str();
                         tokens.push(prefix);
                         tokens.push(MAIN_SEPARATOR.as_os_str());
-                        size += prefix.len() - 1;
+                        size += prefix.len() - 2;
+                    }
+                }
+            } else if prefix.is_some() {
+                if let Some(second_token) = iter.next() {
+                    if second_token.eq(".") {
+                        for token in CWD.iter().skip(1) {
+                            tokens.push(token);
+                        }
+                        size += CWD.as_os_str().len() - 1;
+                        size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                    } else if second_token.eq("..") {
+                        let cwd_parent = CWD.parent();
+
+                        match cwd_parent {
+                            Some(cwd_parent) => {
+                                for token in cwd_parent.iter().skip(1) {
+                                    tokens.push(token);
+                                }
+                                size += cwd_parent.as_os_str().len() - 1;
+                                size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                            }
+                            None => {
+                                tokens.push(MAIN_SEPARATOR.as_os_str());
+                                size -= 2;
+                            }
+                        }
+                    } else {
+                        tokens.push(second_token);
                     }
                 }
             } else {
-                if let Some(prefix) = prefix {
-                    if let Some(first_token) = iter.next() {
-                        if first_token.eq(".") {
-                            for token in CWD.iter().skip(1) {
-                                tokens.push(token);
-                            }
-                            size += CWD.as_os_str().len() - 1;
-                            size -= prefix.as_os_str().len();
-                        } else if first_token.eq("..") {
-                            let cwd_parent = CWD.parent();
+                tokens.push(first_token);
+            }
 
-                            match cwd_parent {
-                                Some(cwd_parent) => {
-                                    for token in cwd_parent.iter().skip(1) {
-                                        tokens.push(token);
-                                    }
-                                    size += cwd_parent.as_os_str().len() - 1;
-                                    size -= prefix.as_os_str().len();
-                                }
-                                None => {
-                                    tokens.push(MAIN_SEPARATOR.as_os_str());
-                                    size -= 2;
-                                }
-                            }
+            if prefix.is_some() {
+                for token in iter {
+//                  if token.eq(".") {
+//                      size -= 2;
+//                      continue;
+//                  } else
+                    // Don't need to check single dot. It is already filtered.
+                    if token.eq("..") {
+                        let len = tokens.len();
+
+                        if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
+                            let removed = tokens.remove(len - 1);
+                            size -= removed.len() + 4;
                         } else {
-                            tokens.push(first_token);
+                            size -= 3;
                         }
-
-                        for token in iter {
-//                          if token.eq(".") {
-//                              size -= 2;
-//                              continue;
-//                          } else
-                            // Don't need to check single dot. It is already filtered.
-                            if token.eq("..") {
-                                let len = tokens.len();
-
-                                if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
-                                    let removed = tokens.remove(len - 1);
-                                    size -= removed.len() + 4;
-                                } else {
-                                    size -= 3;
-                                }
-                            } else {
-                                tokens.push(token);
-                            }
-                        }
+                    } else {
+                        tokens.push(token);
                     }
-                } else {
-                    tokens.push(first_token);
+                }
+            } else {
+                for token in iter {
+//                  if token.eq(".") {
+//                      size -= 2;
+//                      continue;
+//                  } else
+                    // Don't need to check single dot. It is already filtered.
+                    if token.eq("..") {
+                        let len = tokens.len();
 
-                    for token in iter {
-//                      if token.eq(".") {
-//                          size -= 2;
-//                          continue;
-//                      } else
-                        // Don't need to check single dot. It is already filtered.
-                        if token.eq("..") {
-                            let len = tokens.len();
-
-                            if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                                let removed = tokens.remove(len - 1);
-                                size -= removed.len() + 4;
-                            } else {
-                                size -= 3;
-                            }
+                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                            let removed = tokens.remove(len - 1);
+                            size -= removed.len() + 4;
                         } else {
-                            tokens.push(token);
+                            size -= 3;
                         }
+                    } else {
+                        tokens.push(token);
                     }
                 }
             }
