@@ -315,47 +315,75 @@ impl ParseDot for Path {
                     }
                 }
             } else {
-                tokens.push(first_token);
-            }
+                if let Some(prefix) = prefix {
+                    if let Some(first_token) = iter.next() {
+                        if first_token.eq(".") {
+                            for token in CWD.iter().skip(1) {
+                                tokens.push(token);
+                            }
+                            size += CWD.as_os_str().len() - 1;
+                            size -= prefix.as_os_str().len();
+                        } else if first_token.eq("..") {
+                            let cwd_parent = CWD.parent();
 
-            if prefix.is_some() {
-                for token in iter {
-//                  if token.eq(".") {
-//                      size -= 2;
-//                      continue;
-//                  } else
-                    // Don't need to check single dot. It is already filtered.
-                    if token.eq("..") {
-                        let len = tokens.len();
-
-                        if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
-                            let removed = tokens.remove(len - 1);
-                            size -= removed.len() + 4;
+                            match cwd_parent {
+                                Some(cwd_parent) => {
+                                    for token in cwd_parent.iter().skip(1) {
+                                        tokens.push(token);
+                                    }
+                                    size += cwd_parent.as_os_str().len() - 1;
+                                    size -= prefix.as_os_str().len();
+                                }
+                                None => {
+                                    tokens.push(MAIN_SEPARATOR.as_os_str());
+                                    size -= 2;
+                                }
+                            }
                         } else {
-                            size -= 3;
+                            tokens.push(first_token);
                         }
-                    } else {
-                        tokens.push(token);
+
+                        for token in iter {
+//                          if token.eq(".") {
+//                              size -= 2;
+//                              continue;
+//                          } else
+                            // Don't need to check single dot. It is already filtered.
+                            if token.eq("..") {
+                                let len = tokens.len();
+
+                                if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
+                                    let removed = tokens.remove(len - 1);
+                                    size -= removed.len() + 4;
+                                } else {
+                                    size -= 3;
+                                }
+                            } else {
+                                tokens.push(token);
+                            }
+                        }
                     }
-                }
-            } else {
-                for token in iter {
-//                  if token.eq(".") {
-//                      size -= 2;
-//                      continue;
-//                  } else
-                    // Don't need to check single dot. It is already filtered.
-                    if token.eq("..") {
-                        let len = tokens.len();
+                } else {
+                    tokens.push(first_token);
 
-                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                            let removed = tokens.remove(len - 1);
-                            size -= removed.len() + 4;
+                    for token in iter {
+//                      if token.eq(".") {
+//                          size -= 2;
+//                          continue;
+//                      } else
+                        // Don't need to check single dot. It is already filtered.
+                        if token.eq("..") {
+                            let len = tokens.len();
+
+                            if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                                let removed = tokens.remove(len - 1);
+                                size -= removed.len() + 4;
+                            } else {
+                                size -= 3;
+                            }
                         } else {
-                            size -= 3;
+                            tokens.push(token);
                         }
-                    } else {
-                        tokens.push(token);
                     }
                 }
             }
@@ -469,6 +497,35 @@ mod tests {
             }
             None => {
                 assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(windows)]
+    #[ignore]
+    // Ignored because the test needs to be run under the drive C
+    fn dedot_lv0_3() {
+        let p = Path::new(r"C:.\path\to\123\456");
+
+        assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    #[ignore]
+    // Ignored because the test needs to be run under the drive C
+    fn dedot_lv0_4() {
+        let p = Path::new(r"C:..\path\to\123\456");
+
+        let cwd_parent = CWD.parent();
+
+        match cwd_parent {
+            Some(cwd_parent) => {
+                assert_eq!(Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            }
+            None => {
+                assert_eq!(Path::join(Path::new("C:/"), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
         }
     }
