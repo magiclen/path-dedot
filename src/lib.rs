@@ -319,6 +319,7 @@ impl ParseDot for Path {
 
                 if prefix.is_some() {
                     if let Some(second_token) = iter.next() {
+                        println!("second_token={}", second_token);
                         if second_token.eq(".") {
                             for token in CWD.iter().skip(1) {
                                 tokens.push(token);
@@ -524,10 +525,10 @@ mod tests {
 
         match cwd_parent {
             Some(cwd_parent) => {
-                assert_eq!(Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+                assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
             None => {
-                assert_eq!(Path::join(Path::new("C:/"), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+                assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
             }
         }
     }
