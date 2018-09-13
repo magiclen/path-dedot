@@ -314,36 +314,38 @@ impl ParseDot for Path {
                         size += prefix.len() - 2;
                     }
                 }
-            } else if prefix.is_some() {
-                if let Some(second_token) = iter.next() {
-                    if second_token.eq(".") {
-                        for token in CWD.iter().skip(1) {
-                            tokens.push(token);
-                        }
-                        size += CWD.as_os_str().len() - 1;
-                        size -= CWD.get_path_prefix().unwrap().as_os_str().len();
-                    } else if second_token.eq("..") {
-                        let cwd_parent = CWD.parent();
-
-                        match cwd_parent {
-                            Some(cwd_parent) => {
-                                for token in cwd_parent.iter().skip(1) {
-                                    tokens.push(token);
-                                }
-                                size += cwd_parent.as_os_str().len() - 1;
-                                size -= CWD.get_path_prefix().unwrap().as_os_str().len();
-                            }
-                            None => {
-                                tokens.push(MAIN_SEPARATOR.as_os_str());
-                                size -= 2;
-                            }
-                        }
-                    } else {
-                        tokens.push(second_token);
-                    }
-                }
             } else {
                 tokens.push(first_token);
+
+                if prefix.is_some() {
+                    if let Some(second_token) = iter.next() {
+                        if second_token.eq(".") {
+                            for token in CWD.iter().skip(1) {
+                                tokens.push(token);
+                            }
+                            size += CWD.as_os_str().len() - 1;
+                            size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                        } else if second_token.eq("..") {
+                            let cwd_parent = CWD.parent();
+
+                            match cwd_parent {
+                                Some(cwd_parent) => {
+                                    for token in cwd_parent.iter().skip(1) {
+                                        tokens.push(token);
+                                    }
+                                    size += cwd_parent.as_os_str().len() - 1;
+                                    size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                                }
+                                None => {
+                                    tokens.push(MAIN_SEPARATOR.as_os_str());
+                                    size -= 2;
+                                }
+                            }
+                        } else {
+                            tokens.push(second_token);
+                        }
+                    }
+                }
             }
 
             if prefix.is_some() {
