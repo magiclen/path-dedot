@@ -195,6 +195,8 @@ pub trait ParseDot {
 impl ParseDot for Path {
     #[cfg(not(windows))]
     fn parse_dot(&self) -> io::Result<PathBuf> {
+        let mut size = self.as_os_str().len();
+
         let mut tokens = Vec::new();
 
         let mut iter = self.iter();
@@ -204,6 +206,7 @@ impl ParseDot for Path {
                 for token in CWD.iter() {
                     tokens.push(token);
                 }
+                size += CWD.as_os_str().len() - 1;
             } else if first_token.eq("..") {
                 let cwd_parent = CWD.parent();
 
@@ -212,9 +215,11 @@ impl ParseDot for Path {
                         for token in cwd_parent.iter() {
                             tokens.push(token);
                         }
+                        size += cwd_parent.as_os_str().len() - 2;
                     }
                     None => {
                         tokens.push(MAIN_SEPARATOR.as_os_str());
+                        size -= 2;
                     }
                 }
             } else {
@@ -222,12 +227,18 @@ impl ParseDot for Path {
             }
 
             for token in iter {
-                if token.eq(".") {
-                    continue;
-                } else if token.eq("..") {
+//                if token.eq(".") {
+//                    size -= 2;
+//                    continue;
+//                } else
+                // Don't need to check single dot. It is already filtered.
+                if token.eq("..") {
                     let len = tokens.len();
                     if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                        tokens.remove(len - 1);
+                        let removed = tokens.remove(len - 1);
+                        size -= removed.len() + 4;
+                    } else {
+                        size -= 3;
                     }
                 } else {
                     tokens.push(token);
@@ -235,7 +246,7 @@ impl ParseDot for Path {
             }
         }
 
-        let mut path = OsString::new();
+        let mut path = OsString::with_capacity(size);
 
         let len = tokens.len();
 
@@ -261,13 +272,15 @@ impl ParseDot for Path {
             }
         }
 
-        let path_buf = PathBuf::from(&path);
+        let path_buf = PathBuf::from(path);
 
         Ok(path_buf)
     }
 
     #[cfg(windows)]
     fn parse_dot(&self) -> io::Result<PathBuf> {
+        let mut size = self.as_os_str().len();
+
         let mut tokens = Vec::new();
 
         let mut iter = self.iter();
@@ -281,6 +294,7 @@ impl ParseDot for Path {
                 for token in CWD.iter() {
                     tokens.push(token);
                 }
+                size += CWD.as_os_str().len() - 1;
             } else if first_token.eq("..") {
                 prefix = CWD.get_path_prefix();
 
@@ -291,38 +305,63 @@ impl ParseDot for Path {
                         for token in cwd_parent.iter() {
                             tokens.push(token);
                         }
+                        size += cwd_parent.as_os_str().len() - 1;
                     }
                     None => {
-                        tokens.push(prefix.unwrap().as_os_str());
+                        let prefix = prefix.unwrap().as_os_str();
+                        tokens.push(prefix);
                         tokens.push(MAIN_SEPARATOR.as_os_str());
+                        size += prefix.len() - 1;
                     }
                 }
             } else {
                 tokens.push(first_token);
             }
 
-            for token in iter {
-                if token.eq(".") {
-                    continue;
-                } else if token.eq("..") {
-                    let len = tokens.len();
+            if prefix.is_some() {
+                for token in iter {
+//                  if token.eq(".") {
+//                      size -= 2;
+//                      continue;
+//                  } else
+                    // Don't need to check single dot. It is already filtered.
+                    if token.eq("..") {
+                        let len = tokens.len();
 
-                    if let Some(_) = prefix {
                         if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
-                            tokens.remove(len - 1);
+                            let removed = tokens.remove(len - 1);
+                            size -= removed.len() + 4;
+                        } else {
+                            size -= 3;
                         }
                     } else {
-                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                            tokens.remove(len - 1);
-                        }
+                        tokens.push(token);
                     }
-                } else {
-                    tokens.push(token);
+                }
+            } else {
+                for token in iter {
+//                  if token.eq(".") {
+//                      size -= 2;
+//                      continue;
+//                  } else
+                    // Don't need to check single dot. It is already filtered.
+                    if token.eq("..") {
+                        let len = tokens.len();
+
+                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
+                            let removed = tokens.remove(len - 1);
+                            size -= removed.len() + 4;
+                        } else {
+                            size -= 3;
+                        }
+                    } else {
+                        tokens.push(token);
+                    }
                 }
             }
         }
 
-        let mut path = OsString::new();
+        let mut path = OsString::with_capacity(size);
 
         let len = tokens.len();
 
@@ -333,7 +372,7 @@ impl ParseDot for Path {
                 path.push(first_token);
 
                 if len > 1 {
-                    if let Some(_) = prefix {
+                    if prefix.is_some() {
                         if let Some(second_token) = iter.next() {
                             path.push(second_token);
 
@@ -364,7 +403,7 @@ impl ParseDot for Path {
             }
         }
 
-        let path_buf = PathBuf::from(&path);
+        let path_buf = PathBuf::from(path);
 
         Ok(path_buf)
     }
