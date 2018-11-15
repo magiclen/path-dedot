@@ -201,4 +201,4 @@ impl ParseDot for PathBuf {
 }
 
 mod unix;
-mod window;
+mod windows;
