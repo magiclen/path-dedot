@@ -4,7 +4,7 @@ extern crate path_dedot;
 
 use std::path::Path;
 
-use path_dedot::{CWD, ParseDot};
+use path_dedot::{CWD, ParseDot, ParsePrefix};
 
 #[test]
 fn dedot_lv0_1() {
