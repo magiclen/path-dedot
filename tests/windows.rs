@@ -129,3 +129,31 @@ fn dedot_lv5_2() {
 
     assert_eq!(r"C:\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
+
+#[test]
+fn prefix_1() {
+    let p = Path::new(r"C:\");
+
+    assert_eq!(r"C:\", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn prefix_2() {
+    let p = Path::new(r"C:");
+
+    assert_eq!(r"C:", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn prefix_3() {
+    let p = Path::new(r"\\VBOXSRV\test");
+
+    assert_eq!(r"\\VBOXSRV\test\", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn prefix_4() {
+    let p = Path::new(r"\\VBOXSRV\test\");
+
+    assert_eq!(r"\\VBOXSRV\test\", p.parse_dot().unwrap().to_str().unwrap());
+}

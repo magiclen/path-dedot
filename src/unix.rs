@@ -40,10 +40,10 @@ impl ParseDot for Path {
             }
 
             for token in iter {
-//                if token.eq(".") {
-//                    size -= 2;
-//                    continue;
-//                } else
+//              if token.eq(".") {
+//                  size -= 2;
+//                  continue;
+//              } else
                 // Don't need to check single dot. It is already filtered.
                 if token.eq("..") {
                     let len = tokens.len();
