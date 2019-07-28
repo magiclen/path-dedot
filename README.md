@@ -2,7 +2,6 @@ Path Dedot
 ====================
 
 [![Build Status](https://travis-ci.org/magiclen/path-dedot.svg?branch=master)](https://travis-ci.org/magiclen/path-dedot)
-[![Build status](https://ci.appveyor.com/api/projects/status/g414e2562hkllsnn?svg=true)](https://ci.appveyor.com/project/magiclen/path-dedot)
 
 This is a library for extending `Path` and `PathBuf` in order to parse the path which contains dots.
 
