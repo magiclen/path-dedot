@@ -2,9 +2,9 @@
 
 use super::{ParseDot, CWD, MAIN_SEPARATOR};
 
-use std::io;
 use std::ffi::OsString;
-use std::path::{Path, PathBuf, Component, PrefixComponent};
+use std::io;
+use std::path::{Component, Path, PathBuf, PrefixComponent};
 
 pub trait ParsePrefix {
     fn get_path_prefix(&self) -> Option<PrefixComponent>;
@@ -81,7 +81,11 @@ impl ParseDot for Path {
                     let prefix_len = prefix.as_os_str().len();
                     let path_len = path.len();
 
-                    if prefix_len < path_len && path[prefix_len..prefix_len + 1].eq(".") && (prefix_len + 1 == path_len || path[prefix_len + 1..prefix_len + 2].eq(r"\")) {
+                    if prefix_len < path_len
+                        && path[prefix_len..prefix_len + 1].eq(".")
+                        && (prefix_len + 1 == path_len
+                            || path[prefix_len + 1..prefix_len + 2].eq(r"\"))
+                    {
                         for token in CWD.iter().skip(1) {
                             tokens.push(token);
                         }
@@ -113,10 +117,10 @@ impl ParseDot for Path {
 
             if prefix.is_some() {
                 for token in iter {
-//                  if token.eq(".") {
-//                      size -= 2;
-//                      continue;
-//                  } else
+                    //                  if token.eq(".") {
+                    //                      size -= 2;
+                    //                      continue;
+                    //                  } else
                     // Don't need to check single dot. It is already filtered.
                     if token.eq("..") {
                         let len = tokens.len();
@@ -133,10 +137,10 @@ impl ParseDot for Path {
                 }
             } else {
                 for token in iter {
-//                  if token.eq(".") {
-//                      size -= 2;
-//                      continue;
-//                  } else
+                    //                  if token.eq(".") {
+                    //                      size -= 2;
+                    //                      continue;
+                    //                  } else
                     // Don't need to check single dot. It is already filtered.
                     if token.eq("..") {
                         let len = tokens.len();

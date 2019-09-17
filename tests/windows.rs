@@ -4,13 +4,16 @@ extern crate path_dedot;
 
 use std::path::Path;
 
-use path_dedot::{CWD, ParseDot, ParsePrefix};
+use path_dedot::{ParseDot, ParsePrefix, CWD};
 
 #[test]
 fn dedot_lv0_1() {
     let p = Path::new(r".\path\to\123\456");
 
-    assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+    assert_eq!(
+        Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(),
+        p.parse_dot().unwrap().to_str().unwrap()
+    );
 }
 
 #[test]
@@ -21,10 +24,21 @@ fn dedot_lv0_2() {
 
     match cwd_parent {
         Some(cwd_parent) => {
-            assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            assert_eq!(
+                Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(),
+                p.parse_dot().unwrap().to_str().unwrap()
+            );
         }
         None => {
-            assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            assert_eq!(
+                Path::join(
+                    Path::new(CWD.get_path_prefix().unwrap().as_os_str()),
+                    Path::new(r"\path\to\123\456")
+                )
+                .to_str()
+                .unwrap(),
+                p.parse_dot().unwrap().to_str().unwrap()
+            );
         }
     }
 }
@@ -37,7 +51,10 @@ fn dedot_lv0_3() {
 
     let p = Path::join(Path::new(prefix.as_os_str()), Path::new(r".\path\to\123\456"));
 
-    assert_eq!(Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+    assert_eq!(
+        Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(),
+        p.parse_dot().unwrap().to_str().unwrap()
+    );
 }
 
 #[test]
@@ -52,10 +69,21 @@ fn dedot_lv0_4() {
 
     match cwd_parent {
         Some(cwd_parent) => {
-            assert_eq!(Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            assert_eq!(
+                Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(),
+                p.parse_dot().unwrap().to_str().unwrap()
+            );
         }
         None => {
-            assert_eq!(Path::join(Path::new(CWD.get_path_prefix().unwrap().as_os_str()), Path::new(r"\path\to\123\456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+            assert_eq!(
+                Path::join(
+                    Path::new(CWD.get_path_prefix().unwrap().as_os_str()),
+                    Path::new(r"\path\to\123\456")
+                )
+                .to_str()
+                .unwrap(),
+                p.parse_dot().unwrap().to_str().unwrap()
+            );
         }
     }
 }

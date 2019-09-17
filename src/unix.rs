@@ -2,8 +2,8 @@
 
 use super::{ParseDot, CWD, MAIN_SEPARATOR};
 
-use std::io;
 use std::ffi::OsString;
+use std::io;
 use std::path::{Path, PathBuf};
 
 impl ParseDot for Path {
@@ -40,10 +40,10 @@ impl ParseDot for Path {
             }
 
             for token in iter {
-//              if token.eq(".") {
-//                  size -= 2;
-//                  continue;
-//              } else
+                //              if token.eq(".") {
+                //                  size -= 2;
+                //                  continue;
+                //              } else
                 // Don't need to check single dot. It is already filtered.
                 if token.eq("..") {
                     let len = tokens.len();

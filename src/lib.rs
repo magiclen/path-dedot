@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate lazy_static;
 
-use std::path::{self, Path, PathBuf};
-use std::io;
 use std::env;
 use std::ffi::OsString;
+use std::io;
+use std::path::{self, Path, PathBuf};
 
 #[cfg(windows)]
 use std::path::{Component, PrefixComponent};
@@ -70,11 +70,12 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("./path/to/123/456");
     ///
-    ///     assert_eq!(Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
-    ///
+    ///     assert_eq!(
+    ///         Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(),
+    ///         p.parse_dot().unwrap().to_str().unwrap()
+    ///     );
     /// }
     /// ```
     ///
@@ -88,20 +89,24 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("../path/to/123/456");
     ///
     ///     let cwd_parent = CWD.parent();
     ///
     ///     match cwd_parent {
-    ///        Some(cwd_parent) => {
-    ///       assert_eq!(Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
-    ///        }
-    ///        None => {
-    ///           assert_eq!(Path::join(Path::new("/"), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
-    ///        }
+    ///         Some(cwd_parent) => {
+    ///             assert_eq!(
+    ///                 Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(),
+    ///                 p.parse_dot().unwrap().to_str().unwrap()
+    ///             );
+    ///         }
+    ///         None => {
+    ///             assert_eq!(
+    ///                 Path::join(Path::new("/"), Path::new("path/to/123/456")).to_str().unwrap(),
+    ///                 p.parse_dot().unwrap().to_str().unwrap()
+    ///             );
+    ///         }
     ///     }
-    ///
     /// }
     /// ```
     ///
@@ -115,7 +120,6 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("/path/to/../123/456/./777");
     ///
     ///     assert_eq!("/path/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
@@ -130,11 +134,9 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("/path/to/../123/456/./777/..");
     ///
     ///     assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
-    ///
     /// }
     /// ```
     ///
@@ -148,11 +150,9 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("path/to/../123/456/./777/..");
     ///
     ///     assert_eq!("path/123/456", p.parse_dot().unwrap().to_str().unwrap());
-    ///
     /// }
     /// ```
     ///
@@ -166,11 +166,9 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("path/to/../../../../123/456/./777/..");
     ///
     ///     assert_eq!("123/456", p.parse_dot().unwrap().to_str().unwrap());
-    ///
     /// }
     /// ```
     ///
@@ -182,11 +180,9 @@ pub trait ParseDot {
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
-    ///
     ///     let p = Path::new("/path/to/../../../../123/456/./777/..");
     ///
     ///     assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
-    ///
     /// }
     /// ```
     fn parse_dot(&self) -> io::Result<PathBuf>;
