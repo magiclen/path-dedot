@@ -1,18 +1,18 @@
 use std::env;
-use std::path::{Path, PathBuf};
 use std::ops::Deref;
+use std::path::{Path, PathBuf};
 
 /// Current working directory.
 #[doc(hidden)]
 pub struct CWD {
-    path: Option<PathBuf>
+    path: Option<PathBuf>,
 }
 
 impl CWD {
     #[inline]
     pub(crate) const fn new() -> CWD {
         CWD {
-            path: None
+            path: None,
         }
     }
 
