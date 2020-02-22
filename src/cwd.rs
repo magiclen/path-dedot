@@ -24,7 +24,8 @@ impl CWD {
     }
 
     #[inline]
-    pub(crate) fn initial(&mut self) {
+    #[doc(hidden)]
+    pub fn initial(&mut self) {
         if self.path.is_none() {
             self.update();
         }
