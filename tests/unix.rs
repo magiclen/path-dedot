@@ -3,15 +3,16 @@
 extern crate path_dedot;
 
 use std::path::Path;
+use std::env;
 
-use path_dedot::{ParseDot, CWD};
+use path_dedot::ParseDot;
 
 #[test]
 fn dedot_lv0_1() {
     let p = Path::new("./path/to/123/456");
 
     assert_eq!(
-        Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(),
+        Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(),
         p.parse_dot().unwrap().to_str().unwrap()
     );
 }
@@ -20,7 +21,9 @@ fn dedot_lv0_1() {
 fn dedot_lv0_2() {
     let p = Path::new("../path/to/123/456");
 
-    let cwd_parent = CWD.parent();
+    let cwd = env::current_dir().unwrap();
+
+    let cwd_parent = cwd.parent();
 
     match cwd_parent {
         Some(cwd_parent) => {

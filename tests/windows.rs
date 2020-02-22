@@ -3,15 +3,16 @@
 extern crate path_dedot;
 
 use std::path::Path;
+use std::env;
 
-use path_dedot::{ParseDot, ParsePrefix, CWD};
+use path_dedot::{ParseDot, ParsePrefix};
 
 #[test]
 fn dedot_lv0_1() {
     let p = Path::new(r".\path\to\123\456");
 
     assert_eq!(
-        Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(),
+        Path::join(env::current_dir().unwrap().as_path(), Path::new(r"path\to\123\456")).to_str().unwrap(),
         p.parse_dot().unwrap().to_str().unwrap()
     );
 }
@@ -20,7 +21,9 @@ fn dedot_lv0_1() {
 fn dedot_lv0_2() {
     let p = Path::new(r"..\path\to\123\456");
 
-    let cwd_parent = CWD.parent();
+    let cwd = env::current_dir().unwrap();
+
+    let cwd_parent = cwd.parent();
 
     match cwd_parent {
         Some(cwd_parent) => {
@@ -32,11 +35,11 @@ fn dedot_lv0_2() {
         None => {
             assert_eq!(
                 Path::join(
-                    Path::new(CWD.get_path_prefix().unwrap().as_os_str()),
-                    Path::new(r"\path\to\123\456")
+                    Path::new(cwd.get_path_prefix().unwrap().as_os_str()),
+                    Path::new(r"\path\to\123\456"),
                 )
-                .to_str()
-                .unwrap(),
+                    .to_str()
+                    .unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
         }
@@ -47,12 +50,14 @@ fn dedot_lv0_2() {
 #[ignore]
 // Ignored because it may not be standard
 fn dedot_lv0_3() {
-    let prefix = CWD.get_path_prefix().unwrap();
+    let cwd = env::current_dir().unwrap();
+
+    let prefix = cwd.get_path_prefix().unwrap();
 
     let p = Path::join(Path::new(prefix.as_os_str()), Path::new(r".\path\to\123\456"));
 
     assert_eq!(
-        Path::join(&CWD, Path::new(r"path\to\123\456")).to_str().unwrap(),
+        Path::join(&cwd, Path::new(r"path\to\123\456")).to_str().unwrap(),
         p.parse_dot().unwrap().to_str().unwrap()
     );
 }
@@ -61,11 +66,13 @@ fn dedot_lv0_3() {
 #[ignore]
 // Ignored because it may not be standard
 fn dedot_lv0_4() {
-    let prefix = CWD.get_path_prefix().unwrap();
+    let cwd = env::current_dir().unwrap();
+
+    let prefix = cwd.get_path_prefix().unwrap();
 
     let p = Path::join(Path::new(prefix.as_os_str()), Path::new(r"..\path\to\123\456"));
 
-    let cwd_parent = CWD.parent();
+    let cwd_parent = cwd.parent();
 
     match cwd_parent {
         Some(cwd_parent) => {
@@ -77,11 +84,11 @@ fn dedot_lv0_4() {
         None => {
             assert_eq!(
                 Path::join(
-                    Path::new(CWD.get_path_prefix().unwrap().as_os_str()),
-                    Path::new(r"\path\to\123\456")
+                    Path::new(cwd.get_path_prefix().unwrap().as_os_str()),
+                    Path::new(r"\path\to\123\456"),
                 )
-                .to_str()
-                .unwrap(),
+                    .to_str()
+                    .unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
         }

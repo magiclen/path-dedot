@@ -45,17 +45,23 @@ impl ParseDot for Path {
         let mut prefix = self.get_path_prefix();
 
         if let Some(first_token) = iter.next() {
-            if first_token.eq(".") {
-                prefix = CWD.get_path_prefix();
+            let cwd = unsafe {
+                CWD.initial();
 
-                for token in CWD.iter() {
+                &CWD
+            };
+
+            if first_token.eq(".") {
+                prefix = cwd.get_path_prefix();
+
+                for token in cwd.iter() {
                     tokens.push(token);
                 }
-                size += CWD.as_os_str().len() - 1;
+                size += cwd.as_os_str().len() - 1;
             } else if first_token.eq("..") {
-                prefix = CWD.get_path_prefix();
+                prefix = cwd.get_path_prefix();
 
-                let cwd_parent = CWD.parent();
+                let cwd_parent = cwd.parent();
 
                 match cwd_parent {
                     Some(cwd_parent) => {
@@ -86,14 +92,14 @@ impl ParseDot for Path {
                         && (prefix_len + 1 == path_len
                             || path[prefix_len + 1..prefix_len + 2].eq(r"\"))
                     {
-                        for token in CWD.iter().skip(1) {
+                        for token in cwd.iter().skip(1) {
                             tokens.push(token);
                         }
-                        size += CWD.as_os_str().len() - 1;
-                        size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                        size += cwd.as_os_str().len() - 1;
+                        size -= cwd.get_path_prefix().unwrap().as_os_str().len();
                     } else if let Some(second_token) = iter.next() {
                         if second_token.eq("..") {
-                            let cwd_parent = CWD.parent();
+                            let cwd_parent = cwd.parent();
 
                             match cwd_parent {
                                 Some(cwd_parent) => {
@@ -101,7 +107,7 @@ impl ParseDot for Path {
                                         tokens.push(token);
                                     }
                                     size += cwd_parent.as_os_str().len() - 1;
-                                    size -= CWD.get_path_prefix().unwrap().as_os_str().len();
+                                    size -= cwd.get_path_prefix().unwrap().as_os_str().len();
                                 }
                                 None => {
                                     tokens.push(MAIN_SEPARATOR.as_os_str());

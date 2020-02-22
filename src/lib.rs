@@ -1,7 +1,8 @@
 #[macro_use]
 extern crate lazy_static;
 
-use std::env;
+mod cwd;
+
 use std::ffi::OsString;
 use std::io;
 use std::path::{self, Path, PathBuf};
@@ -10,15 +11,18 @@ use std::path::{self, Path, PathBuf};
 use std::path::{Component, PrefixComponent};
 
 lazy_static! {
-    /// Current working directory.
-    pub static ref CWD: PathBuf = {
-        env::current_dir().unwrap()
-    };
-
     /// The main separator for the target OS.
     pub static ref MAIN_SEPARATOR: OsString = {
         OsString::from(path::MAIN_SEPARATOR.to_string())
     };
+}
+
+#[doc(hidden)]
+pub static mut CWD: cwd::CWD = cwd::CWD::new();
+
+/// Update the CWD cached in the `path-dedot` crate after using the `std::env::set_current_dir` function. It is not a safe operation. Make sure there is no `parse_dot` method running at this moment.
+pub unsafe fn update_cwd() {
+    CWD.update();
 }
 
 #[cfg(windows)]
@@ -66,6 +70,7 @@ pub trait ParseDot {
     /// extern crate path_dedot;
     ///
     /// use std::path::Path;
+    /// use std::env;
     ///
     /// use path_dedot::*;
     ///
@@ -73,7 +78,7 @@ pub trait ParseDot {
     ///     let p = Path::new("./path/to/123/456");
     ///
     ///     assert_eq!(
-    ///         Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(),
+    ///         Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(),
     ///         p.parse_dot().unwrap().to_str().unwrap()
     ///     );
     /// }
@@ -85,13 +90,16 @@ pub trait ParseDot {
     /// extern crate path_dedot;
     ///
     /// use std::path::Path;
+    /// use std::env;
     ///
     /// use path_dedot::*;
     ///
     /// if cfg!(not(windows)) {
     ///     let p = Path::new("../path/to/123/456");
     ///
-    ///     let cwd_parent = CWD.parent();
+    ///     let cwd = env::current_dir().unwrap();
+    ///
+    ///     let cwd_parent = cwd.parent();
     ///
     ///     match cwd_parent {
     ///         Some(cwd_parent) => {

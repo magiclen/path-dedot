@@ -15,13 +15,19 @@ impl ParseDot for Path {
         let mut iter = self.iter();
 
         if let Some(first_token) = iter.next() {
+            let cwd = unsafe {
+                CWD.initial();
+
+                &CWD
+            };
+
             if first_token.eq(".") {
-                for token in CWD.iter() {
+                for token in cwd.iter() {
                     tokens.push(token);
                 }
-                size += CWD.as_os_str().len() - 1;
+                size += cwd.as_os_str().len() - 1;
             } else if first_token.eq("..") {
-                let cwd_parent = CWD.parent();
+                let cwd_parent = cwd.parent();
 
                 match cwd_parent {
                     Some(cwd_parent) => {
