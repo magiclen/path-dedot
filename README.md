@@ -15,12 +15,13 @@ If a path starts with a single dot, the dot means **current working directory**.
 extern crate path_dedot;
 
 use std::path::Path;
+use std::env;
 
 use path_dedot::*;
 
 let p = Path::new("./path/to/123/456");
 
-assert_eq!(Path::join(&CWD, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+assert_eq!(Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
 ```
 
 If a path starts with a pair of dots, the dots means the parent of **current working directory**. If **current working directory** is **root**, the parent is still **root**.
@@ -29,12 +30,15 @@ If a path starts with a pair of dots, the dots means the parent of **current wor
 extern crate path_dedot;
 
 use std::path::Path;
+use std::env;
 
 use path_dedot::*;
 
 let p = Path::new("../path/to/123/456");
 
-let cwd_parent = CWD.parent();
+let cwd = env::current_dir().unwrap();
+
+let cwd_parent = cwd.parent();
 
 match cwd_parent {
    Some(cwd_parent) => {

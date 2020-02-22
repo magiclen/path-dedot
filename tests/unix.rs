@@ -5,7 +5,7 @@ extern crate path_dedot;
 use std::path::Path;
 use std::env;
 
-use path_dedot::ParseDot;
+use path_dedot::{ParseDot, update_cwd};
 
 #[test]
 fn dedot_lv0_1() {
@@ -74,4 +74,25 @@ fn dedot_lv5() {
     let p = Path::new("/path/to/../../../../123/456/./777/..");
 
     assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_after_updating_cwd() {
+    let p = Path::new("./path/to/123/456");
+
+    assert_eq!(
+        Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(),
+        p.parse_dot().unwrap().to_str().unwrap()
+    );
+
+    env::set_current_dir("/").unwrap();
+
+    unsafe {
+        update_cwd();
+    }
+
+    assert_eq!(
+        Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(),
+        p.parse_dot().unwrap().to_str().unwrap()
+    );
 }
