@@ -45,11 +45,7 @@ impl ParseDot for Path {
         let mut prefix = self.get_path_prefix();
 
         if let Some(first_token) = iter.next() {
-            let cwd = unsafe {
-                CWD.initial();
-
-                &CWD
-            };
+            let cwd = unsafe { CWD.initial() };
 
             if first_token.eq(".") {
                 prefix = cwd.get_path_prefix();

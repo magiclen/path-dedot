@@ -20,9 +20,10 @@ lazy_static! {
 #[doc(hidden)]
 pub static mut CWD: cwd::CWD = cwd::CWD::new();
 
-/// Update the CWD cached in the `path-dedot` crate after using the `std::env::set_current_dir` function. It is not a safe operation. Make sure there is no `parse_dot` method running at this moment.
-pub unsafe fn update_cwd() {
-    CWD.update();
+/// Update the CWD cached in the `path-dedot` crate after using the `std::env::set_current_dir` function. It is not a safe operation. Make sure there is no `parse_dot` method running at this moment. If the updating is successful, return `true`.
+#[allow(clippy::missing_safety_doc)]
+pub unsafe fn update_cwd() -> bool {
+    CWD.update().is_some()
 }
 
 #[cfg(windows)]

@@ -78,6 +78,7 @@ fn dedot_lv5() {
     assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
+#[ignore]
 #[test]
 fn dedot_after_updating_cwd() {
     let p = Path::new("./path/to/123/456");

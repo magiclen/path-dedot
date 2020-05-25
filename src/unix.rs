@@ -10,17 +10,13 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut size = self.as_os_str().len();
 
+        let cwd = unsafe { CWD.initial() };
+
         let mut tokens = Vec::new();
 
         let mut iter = self.iter();
 
         if let Some(first_token) = iter.next() {
-            let cwd = unsafe {
-                CWD.initial();
-
-                &CWD
-            };
-
             if first_token.eq(".") {
                 for token in cwd.iter() {
                     tokens.push(token);
