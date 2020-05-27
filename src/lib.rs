@@ -7,7 +7,7 @@ Please read the following examples to know the parsing rules.
 
 ## Examples
 
-If a path starts with a single dot, the dot means **current working directory**.
+If a path starts with a single dot, the dot means your program's **current working directory** (CWD).
 
 ```rust
 extern crate path_dedot;
@@ -23,7 +23,7 @@ assert_eq!(Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/
 # }
 ```
 
-If a path starts with a pair of dots, the dots means the parent of **current working directory**. If **current working directory** is **root**, the parent is still **root**.
+If a path starts with a pair of dots, the dots means the parent of the CWD. If the CWD is **root**, the parent is still **root**.
 
 ```rust
 extern crate path_dedot;
@@ -51,7 +51,7 @@ match cwd_parent {
 # }
 ```
 
-Besides starting with, the **Single Dot** and **Double Dots** can also be placed to other positions. **Single Dot** means noting and will be ignored. **Double Dots** means the parent.
+In addition to starting with, the **Single Dot** and **Double Dots** can also be placed to other positions. **Single Dot** means noting and will be ignored. **Double Dots** means the parent.
 
 ```rust
 extern crate path_dedot;
@@ -129,7 +129,7 @@ assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 
 ## Caching
 
-By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD (current working directory) every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
+By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
 
 In order to parse paths with better performance, this crate provide two ways to cache the CWD.
 
@@ -149,8 +149,6 @@ features = ["lazy_static_cache"]
 Enabling the `unsafe_cache` feature can let this crate use a mutable static variable to cache the CWD. It allows the program to change the CWD at runtime by the program itself, but it's not thread-safe.
 
 You need to use the `update_cwd` function to initialize the CWD first. The function should also be used to update the CWD after the CWD is changed.
-
-`unsafe_cache` is faster than `lazy_static_cache`, but you need to use `unsafe_cache` carefully.
 
 ```toml
 [dependencies.path-dedot]
@@ -183,6 +181,26 @@ unsafe {
 }
 
 println!("{}", p.parse_dot().unwrap().to_str().unwrap());
+```
+
+## Benchmark
+
+#### No-cache
+
+```bash
+cargo bench
+```
+
+#### `lazy_static_cache`
+
+```bash
+cargo bench --no-default-features --features lazy_static_cache
+```
+
+#### `unsafe_cache`
+
+```bash
+cargo bench --no-default-features --features unsafe_cache
 ```
 
 */
