@@ -22,7 +22,6 @@ lazy_static = "1.4"
 bencher = "0.1.5"
 
 [features]
-default = []
 lazy_static_cache = []
 unsafe_cache = []
 

@@ -129,7 +129,6 @@ Enabling the `lazy_static_cache` feature can let this crate use `lazy_static` to
 ```toml
 [dependencies.path-dedot]
 version = "*"
-default-features = false
 features = ["lazy_static_cache"]
 ```
 
@@ -142,7 +141,6 @@ You need to use the `update_cwd` function to initialize the CWD first. The funct
 ```toml
 [dependencies.path-dedot]
 version = "*"
-default-features = false
 features = ["unsafe_cache"]
 ```
 
@@ -181,13 +179,13 @@ cargo bench
 #### lazy_static_cache
 
 ```bash
-cargo bench --no-default-features --features lazy_static_cache
+cargo bench --features lazy_static_cache
 ```
 
 #### unsafe_cache
 
 ```bash
-cargo bench --no-default-features --features unsafe_cache
+cargo bench --features unsafe_cache
 ```
 
 ## Crates.io
