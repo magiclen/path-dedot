@@ -37,7 +37,7 @@ impl ParseDot for Path {
 
                                 size -= 1;
 
-                                (true, false)
+                                (true, true)
                             }
                             Component::ParentDir => {
                                 match cwd.parent() {
