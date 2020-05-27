@@ -153,7 +153,6 @@ use std::path::Path;
 
 use path_dedot::*;
 
-##[cfg(feature = "unsafe_cache")]
 unsafe {
     update_cwd();
 }
@@ -164,7 +163,6 @@ println!("{}", p.parse_dot().unwrap().to_str().unwrap());
 
 std::env::set_current_dir("/").unwrap();
 
-##[cfg(feature = "unsafe_cache")]
 unsafe {
     update_cwd();
 }
