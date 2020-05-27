@@ -116,6 +116,64 @@ let p = Path::new("/path/to/../../../../123/456/./777/..");
 assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 ```
 
+## Caching
+
+By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD (current working directory) every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
+
+In order to parse paths with better performance, this crate provide two ways to cache the CWD.
+
+### lazy_static_cache
+
+Enabling the `lazy_static_cache` feature can let this crate use `lazy_static` to cache the CWD. It's thread-safe and does not need to modify any code, but once the CWD is cached, it cannot be changed anymore at runtime.
+
+```toml
+[dependencies.path-dedot]
+version = "*"
+default-features = false
+features = ["lazy_static_cache"]
+```
+
+### unsafe_cache
+
+Enabling the `unsafe_cache` feature can let this crate use a mutable static variable to cache the CWD. It allows the program to change the CWD at runtime by the program itself, but it's not thread-safe.
+
+You need to use the `update_cwd` function to initialize the CWD first. The function should also be used to update the CWD after the CWD is changed.
+
+`unsafe_cache` is faster than `lazy_static_cache`, but you need to use `unsafe_cache` carefully.
+
+```toml
+[dependencies.path-dedot]
+version = "*"
+default-features = false
+features = ["unsafe_cache"]
+```
+
+```rust
+extern crate path_dedot;
+
+use std::path::Path;
+
+use path_dedot::*;
+
+##[cfg(feature = "unsafe_cache")]
+unsafe {
+    update_cwd();
+}
+
+let p = Path::new("./path/to/123/456");
+
+println!("{}", p.parse_dot().unwrap().to_str().unwrap());
+
+std::env::set_current_dir("/").unwrap();
+
+##[cfg(feature = "unsafe_cache")]
+unsafe {
+    update_cwd();
+}
+
+println!("{}", p.parse_dot().unwrap().to_str().unwrap());
+```
+
 ## Crates.io
 
 https://crates.io/crates/path-dedot

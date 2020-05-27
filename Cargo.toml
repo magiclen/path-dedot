@@ -1,6 +1,6 @@
 [package]
 name = "path-dedot"
-version = "1.2.4"
+version = "2.0.0"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2018"
 repository = "https://github.com/magiclen/path-dedot"
@@ -16,4 +16,16 @@ repository = "magiclen/path-dedot"
 branch = "master"
 
 [dependencies]
-lazy_static = "1.1.0"
+lazy_static = "1.4"
+
+[dev-dependencies]
+bencher = "0.1.5"
+
+[features]
+default = []
+lazy_static_cache = []
+unsafe_cache = []
+
+[[bench]]
+name = "bench"
+harness = false

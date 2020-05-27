@@ -1,44 +1,15 @@
-#![cfg(windows)]
-
-use super::{ParseDot, CWD, MAIN_SEPARATOR};
-
 use std::ffi::OsString;
 use std::io;
 use std::path::{Component, Path, PathBuf, PrefixComponent};
 
-pub trait ParsePrefix {
-    fn get_path_prefix(&self) -> Option<PrefixComponent>;
-}
-
-impl ParsePrefix for Path {
-    #[inline]
-    fn get_path_prefix(&self) -> Option<PrefixComponent> {
-        let first_component = self.components().next();
-
-        match first_component.unwrap() {
-            Component::Prefix(prefix_component) => Some(prefix_component),
-            _ => None,
-        }
-    }
-}
-
-impl ParsePrefix for PathBuf {
-    #[inline]
-    fn get_path_prefix(&self) -> Option<PrefixComponent> {
-        let first_component = self.components().next();
-
-        match first_component.unwrap() {
-            Component::Prefix(prefix_component) => Some(prefix_component),
-            _ => None,
-        }
-    }
-}
+use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
+    #[allow(clippy::let_unit_value)]
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut size = self.as_os_str().len();
 
-        let cwd = unsafe { CWD.initial() };
+        let _cwd = get_cwd_pathbuf!();
 
         let mut tokens = Vec::new();
 
@@ -47,6 +18,8 @@ impl ParseDot for Path {
         let mut prefix = self.get_path_prefix();
 
         if let Some(first_token) = iter.next() {
+            let cwd = get_cwd!(_cwd);
+
             if first_token.eq(".") {
                 prefix = cwd.get_path_prefix();
 
@@ -208,5 +181,33 @@ impl ParseDot for Path {
         let path_buf = PathBuf::from(path);
 
         Ok(path_buf)
+    }
+}
+
+pub trait ParsePrefix {
+    fn get_path_prefix(&self) -> Option<PrefixComponent>;
+}
+
+impl ParsePrefix for Path {
+    #[inline]
+    fn get_path_prefix(&self) -> Option<PrefixComponent> {
+        let first_component = self.components().next();
+
+        match first_component.unwrap() {
+            Component::Prefix(prefix_component) => Some(prefix_component),
+            _ => None,
+        }
+    }
+}
+
+impl ParsePrefix for PathBuf {
+    #[inline]
+    fn get_path_prefix(&self) -> Option<PrefixComponent> {
+        let first_component = self.components().next();
+
+        match first_component.unwrap() {
+            Component::Prefix(prefix_component) => Some(prefix_component),
+            _ => None,
+        }
     }
 }
