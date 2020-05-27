@@ -178,13 +178,13 @@ println!("{}", p.parse_dot().unwrap().to_str().unwrap());
 cargo bench
 ```
 
-#### `lazy_static_cache`
+#### lazy_static_cache
 
 ```bash
 cargo bench --no-default-features --features lazy_static_cache
 ```
 
-#### `unsafe_cache`
+#### unsafe_cache
 
 ```bash
 cargo bench --no-default-features --features unsafe_cache
