@@ -1,5 +1,5 @@
 use std::ffi::OsString;
-use std::io;
+use std::io::{self, ErrorKind};
 use std::path::{Component, Path, PathBuf, PrefixComponent};
 
 use crate::{ParseDot, MAIN_SEPARATOR};
@@ -9,178 +9,201 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<PathBuf> {
         let mut size = self.as_os_str().len();
 
-        let _cwd = get_cwd_pathbuf!();
+        let mut iter = self.components();
 
-        let mut tokens = Vec::new();
+        if let Some(first_component) = iter.next() {
+            let cwd = get_cwd!();
 
-        let mut iter = self.iter();
+            let mut tokens = Vec::new();
 
-        let mut prefix = self.get_path_prefix();
+            let (has_prefix, first_is_root) = match first_component {
+                Component::Prefix(prefix) => {
+                    tokens.push(prefix.as_os_str());
 
-        if let Some(first_token) = iter.next() {
-            let cwd = get_cwd!(_cwd);
+                    if let Some(second_component) = iter.next() {
+                        match second_component {
+                            Component::RootDir => {
+                                tokens.push(MAIN_SEPARATOR.as_os_str());
 
-            if first_token.eq(".") {
-                prefix = cwd.get_path_prefix();
+                                (true, true)
+                            }
+                            Component::CurDir => {
+                                // may be unreachable
 
-                for token in cwd.iter() {
-                    tokens.push(token);
-                }
-                size += cwd.as_os_str().len() - 1;
-            } else if first_token.eq("..") {
-                prefix = cwd.get_path_prefix();
+                                for token in cwd.iter().skip(1) {
+                                    tokens.push(token);
+                                    size += token.len();
+                                }
 
-                let cwd_parent = cwd.parent();
+                                size -= 1;
 
-                match cwd_parent {
-                    Some(cwd_parent) => {
-                        for token in cwd_parent.iter() {
-                            tokens.push(token);
+                                (true, false)
+                            }
+                            Component::ParentDir => {
+                                match cwd.parent() {
+                                    Some(cwd_parent) => {
+                                        for token in cwd_parent.iter().skip(1) {
+                                            tokens.push(token);
+                                            size += token.len();
+                                        }
+                                    }
+                                    None => {
+                                        tokens.push(MAIN_SEPARATOR.as_os_str());
+                                    }
+                                }
+
+                                size -= 2;
+
+                                (true, true)
+                            }
+                            _ => {
+                                let path_str = self.as_os_str().to_str().ok_or_else(|| {
+                                    io::Error::new(ErrorKind::Other, "The path is not valid UTF-8.")
+                                })?;
+
+                                if path_str[first_component.as_os_str().len()..].starts_with('.') {
+                                    for token in cwd.iter().skip(1) {
+                                        tokens.push(token);
+                                        size += token.len();
+                                    }
+
+                                    size -= 1;
+
+                                    tokens.push(second_component.as_os_str());
+
+                                    (true, true)
+                                } else {
+                                    tokens.push(second_component.as_os_str());
+
+                                    (true, false)
+                                }
+                            }
                         }
-                        size += cwd_parent.as_os_str().len() - 2;
+                    } else {
+                        (true, false)
                     }
-                    None => {
-                        let prefix = prefix.unwrap().as_os_str();
-                        tokens.push(prefix);
-                        tokens.push(MAIN_SEPARATOR.as_os_str());
+                }
+                Component::RootDir => {
+                    tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                    (false, true)
+                }
+                Component::CurDir => {
+                    for token in cwd.iter() {
+                        tokens.push(token);
+                    }
+
+                    size += cwd.as_os_str().len() - 1;
+
+                    (true, true)
+                }
+                Component::ParentDir => {
+                    match cwd.parent() {
+                        Some(cwd_parent) => {
+                            for token in cwd_parent.iter() {
+                                tokens.push(token);
+                            }
+
+                            size += cwd_parent.as_os_str().len();
+                        }
+                        None => {
+                            let prefix = cwd.get_path_prefix().unwrap().as_os_str();
+                            tokens.push(prefix);
+                            size += prefix.len();
+
+                            tokens.push(MAIN_SEPARATOR.as_os_str());
+                        }
+                    }
+
+                    size -= 2;
+
+                    (true, true)
+                }
+                Component::Normal(token) => {
+                    tokens.push(token);
+
+                    (false, false)
+                }
+            };
+
+            for component in iter {
+                match component {
+                    Component::CurDir => {
+                        // may be unreachable
+
                         size -= 2;
                     }
-                }
-            } else {
-                tokens.push(first_token);
+                    Component::ParentDir => {
+                        let tokens_length = tokens.len();
 
-                if let Some(prefix) = prefix {
-                    // single dot is filtered by the iterator
-                    let path = self.as_os_str().to_str().unwrap();
-
-                    let prefix_len = prefix.as_os_str().len();
-                    let path_len = path.len();
-
-                    if prefix_len < path_len
-                        && path[prefix_len..prefix_len + 1].eq(".")
-                        && (prefix_len + 1 == path_len
-                            || path[prefix_len + 1..prefix_len + 2].eq(r"\"))
-                    {
-                        for token in cwd.iter().skip(1) {
-                            tokens.push(token);
-                        }
-                        size += cwd.as_os_str().len() - 1;
-                        size -= cwd.get_path_prefix().unwrap().as_os_str().len();
-                    } else if let Some(second_token) = iter.next() {
-                        if second_token.eq("..") {
-                            let cwd_parent = cwd.parent();
-
-                            match cwd_parent {
-                                Some(cwd_parent) => {
-                                    for token in cwd_parent.iter().skip(1) {
-                                        tokens.push(token);
-                                    }
-                                    size += cwd_parent.as_os_str().len() - 1;
-                                    size -= cwd.get_path_prefix().unwrap().as_os_str().len();
-                                }
-                                None => {
-                                    tokens.push(MAIN_SEPARATOR.as_os_str());
-                                    size -= 2;
-                                }
-                            }
+                        if tokens_length > 0
+                            && ((tokens_length != 1 || (!first_is_root && !has_prefix))
+                                && (tokens_length != 2 || !(first_is_root && has_prefix)))
+                        {
+                            let removed = tokens.remove(tokens_length - 1);
+                            size -= removed.len() + 4; // xxx\..\
                         } else {
-                            tokens.push(second_token);
+                            size -= 3; // ..\
                         }
+                    }
+                    _ => {
+                        tokens.push(component.as_os_str());
                     }
                 }
             }
 
-            if prefix.is_some() {
-                for token in iter {
-                    //                  if token.eq(".") {
-                    //                      size -= 2;
-                    //                      continue;
-                    //                  } else
-                    // Don't need to check single dot. It is already filtered.
-                    if token.eq("..") {
-                        let len = tokens.len();
+            debug_assert!(!tokens.is_empty());
 
-                        if len > 1 && (len != 2 || tokens[1].ne(MAIN_SEPARATOR.as_os_str())) {
-                            let removed = tokens.remove(len - 1);
-                            size -= removed.len() + 4;
-                        } else {
-                            size -= 3;
-                        }
-                    } else {
-                        tokens.push(token);
-                    }
-                }
-            } else {
-                for token in iter {
-                    //                  if token.eq(".") {
-                    //                      size -= 2;
-                    //                      continue;
-                    //                  } else
-                    // Don't need to check single dot. It is already filtered.
-                    if token.eq("..") {
-                        let len = tokens.len();
-                        if len > 0 && (len != 1 || tokens[0].ne(MAIN_SEPARATOR.as_os_str())) {
-                            let removed = tokens.remove(len - 1);
-                            size -= removed.len() + 4;
-                        } else {
-                            size -= 3;
-                        }
-                    } else {
-                        tokens.push(token);
-                    }
-                }
-            }
-        }
+            let mut path_string = OsString::with_capacity(size);
 
-        let mut path = OsString::with_capacity(size);
-
-        let len = tokens.len();
-
-        if len > 0 {
             let mut iter = tokens.iter();
 
-            if let Some(first_token) = iter.next() {
-                path.push(first_token);
+            path_string.push(iter.next().unwrap());
 
-                if len > 1 {
-                    if prefix.is_some() {
-                        let second_token = iter.next().unwrap();
+            let tokens_length = tokens.len();
 
-                        path.push(second_token);
+            if tokens_length > 1 {
+                if has_prefix {
+                    if let Some(token) = iter.next() {
+                        path_string.push(token);
 
-                        if !second_token.eq(&MAIN_SEPARATOR.as_os_str()) {
-                            path.push(MAIN_SEPARATOR.as_os_str());
-                        }
-
-                        if len > 2 {
-                            for &token in iter.take(len - 3) {
-                                path.push(token);
-
-                                path.push(MAIN_SEPARATOR.as_os_str());
+                        if tokens_length > 2 {
+                            if !first_is_root {
+                                path_string.push(MAIN_SEPARATOR.as_os_str());
                             }
 
-                            path.push(tokens[len - 1]);
-                        }
-                    } else {
-                        if !first_token.eq(&MAIN_SEPARATOR.as_os_str()) {
-                            path.push(MAIN_SEPARATOR.as_os_str());
-                        }
+                            for &token in iter.take(tokens_length - 3) {
+                                path_string.push(token);
 
-                        for &token in iter.take(len - 2) {
-                            path.push(token);
+                                path_string.push(MAIN_SEPARATOR.as_os_str());
+                            }
 
-                            path.push(MAIN_SEPARATOR.as_os_str());
+                            path_string.push(tokens[tokens_length - 1]);
                         }
-
-                        path.push(tokens[len - 1]);
                     }
+                } else {
+                    if !first_is_root {
+                        path_string.push(MAIN_SEPARATOR.as_os_str());
+                    }
+
+                    for &token in iter.take(tokens_length - 2) {
+                        path_string.push(token);
+
+                        path_string.push(MAIN_SEPARATOR.as_os_str());
+                    }
+
+                    path_string.push(tokens[tokens_length - 1]);
                 }
             }
+
+            debug_assert!(size + 1 >= path_string.len()); // + 1 is for `\\server\share` -> `\\server\share\`
+
+            let path_buf = PathBuf::from(path_string);
+
+            Ok(path_buf)
+        } else {
+            Ok(PathBuf::new())
         }
-
-        let path_buf = PathBuf::from(path);
-
-        Ok(path_buf)
     }
 }
 
