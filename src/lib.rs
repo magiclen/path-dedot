@@ -131,7 +131,7 @@ assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 
 By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
 
-In order to parse paths with better performance, this crate provide two ways to cache the CWD.
+In order to parse paths with better performance, this crate provides two ways to cache the CWD.
 
 ### lazy_static_cache
 
