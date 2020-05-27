@@ -38,13 +38,13 @@ impl ParseDot for Path {
                             }
 
                             size += cwd_parent.as_os_str().len();
+                            size -= 2;
                         }
                         None => {
                             tokens.push(MAIN_SEPARATOR.as_os_str());
+                            size -= 1;
                         }
                     }
-
-                    size -= 2;
 
                     true
                 }

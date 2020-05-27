@@ -30,9 +30,16 @@ impl ParseDot for Path {
                             Component::CurDir => {
                                 // may be unreachable
 
-                                for token in cwd.iter().skip(1) {
+                                let mut cwd_iter = cwd.iter().skip(1);
+
+                                if let Some(token) = cwd_iter.next() {
                                     tokens.push(token);
                                     size += token.len();
+
+                                    for token in cwd_iter {
+                                        tokens.push(token);
+                                        size += token.len() + 1;
+                                    }
                                 }
 
                                 size -= 1;
@@ -42,17 +49,26 @@ impl ParseDot for Path {
                             Component::ParentDir => {
                                 match cwd.parent() {
                                     Some(cwd_parent) => {
-                                        for token in cwd_parent.iter().skip(1) {
+                                        let mut cwd_parent_iter = cwd_parent.iter().skip(1);
+
+                                        if let Some(token) = cwd_parent_iter.next() {
                                             tokens.push(token);
                                             size += token.len();
+
+                                            for token in cwd_parent_iter {
+                                                tokens.push(token);
+                                                size += token.len() + 1;
+                                            }
                                         }
+
+                                        size -= 2;
                                     }
                                     None => {
                                         tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                        size -= 1;
                                     }
                                 }
-
-                                size -= 2;
 
                                 (true, true)
                             }
@@ -62,9 +78,16 @@ impl ParseDot for Path {
                                 })?;
 
                                 if path_str[first_component.as_os_str().len()..].starts_with('.') {
-                                    for token in cwd.iter().skip(1) {
+                                    let mut cwd_iter = cwd.iter().skip(1);
+
+                                    if let Some(token) = cwd_iter.next() {
                                         tokens.push(token);
                                         size += token.len();
+
+                                        for token in cwd_iter {
+                                            tokens.push(token);
+                                            size += token.len() + 1;
+                                        }
                                     }
 
                                     size -= 1;
@@ -104,7 +127,7 @@ impl ParseDot for Path {
                                 tokens.push(token);
                             }
 
-                            size += cwd_parent.as_os_str().len();
+                            size += cwd_parent.as_os_str().len() - 2;
                         }
                         None => {
                             let prefix = cwd.get_path_prefix().unwrap().as_os_str();
@@ -112,10 +135,9 @@ impl ParseDot for Path {
                             size += prefix.len();
 
                             tokens.push(MAIN_SEPARATOR.as_os_str());
+                            size -= 1;
                         }
                     }
-
-                    size -= 2;
 
                     (true, true)
                 }
