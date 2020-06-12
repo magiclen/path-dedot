@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::ffi::OsString;
 use std::io::{self, ErrorKind};
 use std::path::{Component, Path, PathBuf, PrefixComponent};
@@ -5,10 +6,12 @@ use std::path::{Component, Path, PathBuf, PrefixComponent};
 use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
-    fn parse_dot(&self) -> io::Result<PathBuf> {
+    fn parse_dot(&self) -> io::Result<Cow<Path>> {
         let mut size = self.as_os_str().len();
 
         let mut iter = self.components();
+
+        let mut has_dots = false;
 
         if let Some(first_component) = iter.next() {
             let cwd = get_cwd!();
@@ -43,6 +46,8 @@ impl ParseDot for Path {
 
                                 size -= 1;
 
+                                has_dots = true;
+
                                 (true, true)
                             }
                             Component::ParentDir => {
@@ -69,6 +74,8 @@ impl ParseDot for Path {
                                     }
                                 }
 
+                                has_dots = true;
+
                                 (true, true)
                             }
                             _ => {
@@ -92,6 +99,8 @@ impl ParseDot for Path {
                                     size -= 1;
 
                                     tokens.push(second_component.as_os_str());
+
+                                    has_dots = true;
 
                                     (true, true)
                                 } else {
@@ -117,6 +126,8 @@ impl ParseDot for Path {
 
                     size += cwd.as_os_str().len() - 1;
 
+                    has_dots = true;
+
                     (true, true)
                 }
                 Component::ParentDir => {
@@ -138,6 +149,8 @@ impl ParseDot for Path {
                         }
                     }
 
+                    has_dots = true;
+
                     (true, true)
                 }
                 Component::Normal(token) => {
@@ -151,8 +164,9 @@ impl ParseDot for Path {
                 match component {
                     Component::CurDir => {
                         // may be unreachable
-
                         size -= 2;
+
+                        has_dots = true;
                     }
                     Component::ParentDir => {
                         let tokens_length = tokens.len();
@@ -166,6 +180,8 @@ impl ParseDot for Path {
                         } else {
                             size -= 3; // ..\
                         }
+
+                        has_dots = true;
                     }
                     _ => {
                         tokens.push(component.as_os_str());
@@ -175,55 +191,59 @@ impl ParseDot for Path {
 
             debug_assert!(!tokens.is_empty());
 
-            let mut path_string = OsString::with_capacity(size);
+            if has_dots {
+                let mut path_string = OsString::with_capacity(size);
 
-            let mut iter = tokens.iter();
+                let mut iter = tokens.iter();
 
-            path_string.push(iter.next().unwrap());
+                path_string.push(iter.next().unwrap());
 
-            let tokens_length = tokens.len();
+                let tokens_length = tokens.len();
 
-            if tokens_length > 1 {
-                if has_prefix {
-                    if let Some(token) = iter.next() {
-                        path_string.push(token);
+                if tokens_length > 1 {
+                    if has_prefix {
+                        if let Some(token) = iter.next() {
+                            path_string.push(token);
 
-                        if tokens_length > 2 {
-                            if !first_is_root {
-                                path_string.push(MAIN_SEPARATOR.as_os_str());
+                            if tokens_length > 2 {
+                                if !first_is_root {
+                                    path_string.push(MAIN_SEPARATOR.as_os_str());
+                                }
+
+                                for &token in iter.take(tokens_length - 3) {
+                                    path_string.push(token);
+
+                                    path_string.push(MAIN_SEPARATOR.as_os_str());
+                                }
+
+                                path_string.push(tokens[tokens_length - 1]);
                             }
-
-                            for &token in iter.take(tokens_length - 3) {
-                                path_string.push(token);
-
-                                path_string.push(MAIN_SEPARATOR.as_os_str());
-                            }
-
-                            path_string.push(tokens[tokens_length - 1]);
                         }
-                    }
-                } else {
-                    if !first_is_root {
-                        path_string.push(MAIN_SEPARATOR.as_os_str());
-                    }
+                    } else {
+                        if !first_is_root {
+                            path_string.push(MAIN_SEPARATOR.as_os_str());
+                        }
 
-                    for &token in iter.take(tokens_length - 2) {
-                        path_string.push(token);
+                        for &token in iter.take(tokens_length - 2) {
+                            path_string.push(token);
 
-                        path_string.push(MAIN_SEPARATOR.as_os_str());
+                            path_string.push(MAIN_SEPARATOR.as_os_str());
+                        }
+
+                        path_string.push(tokens[tokens_length - 1]);
                     }
-
-                    path_string.push(tokens[tokens_length - 1]);
                 }
+
+                debug_assert!(size >= path_string.len()); // `\\server\share` -> `\\server\share\` doesn't has dots
+
+                let path_buf = PathBuf::from(path_string);
+
+                Ok(Cow::from(path_buf))
+            } else {
+                Ok(Cow::from(self))
             }
-
-            debug_assert!(size + 1 >= path_string.len()); // + 1 is for `\\server\share` -> `\\server\share\`
-
-            let path_buf = PathBuf::from(path_string);
-
-            Ok(path_buf)
         } else {
-            Ok(PathBuf::new())
+            Ok(Cow::from(self))
         }
     }
 }
@@ -236,11 +256,13 @@ impl ParsePrefix for Path {
     #[inline]
     fn get_path_prefix(&self) -> Option<PrefixComponent> {
         match self.components().next() {
-            Some(first_component) => match first_component {
-                Component::Prefix(prefix_component) => Some(prefix_component),
-                _ => None,
+            Some(first_component) => {
+                match first_component {
+                    Component::Prefix(prefix_component) => Some(prefix_component),
+                    _ => None,
+                }
             }
-            None => None
+            None => None,
         }
     }
 }

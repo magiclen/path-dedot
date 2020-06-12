@@ -209,9 +209,10 @@ compile_error!("You can only enable at most one caching mechanism for `path-dedo
 #[macro_use]
 extern crate lazy_static;
 
+use std::borrow::Cow;
 use std::ffi::OsString;
 use std::io;
-use std::path::{self, PathBuf};
+use std::path::{self, Path, PathBuf};
 
 mod parse_dot;
 
@@ -239,7 +240,7 @@ lazy_static! {
 
 impl ParseDot for PathBuf {
     #[inline]
-    fn parse_dot(&self) -> io::Result<PathBuf> {
+    fn parse_dot(&self) -> io::Result<Cow<Path>> {
         self.as_path().parse_dot()
     }
 }

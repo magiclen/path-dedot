@@ -185,7 +185,7 @@ fn prefix_2() {
 fn prefix_3() {
     let p = Path::new(r"\\VBOXSRV\test");
 
-    assert_eq!(r"\\VBOXSRV\test\", p.parse_dot().unwrap().to_str().unwrap());
+    assert_eq!(r"\\VBOXSRV\test", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
