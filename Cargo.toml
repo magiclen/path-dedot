@@ -1,6 +1,6 @@
 [package]
 name = "path-dedot"
-version = "3.0.0"
+version = "3.0.1"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2018"
 repository = "https://github.com/magiclen/path-dedot"
@@ -10,6 +10,7 @@ categories = ["parser-implementations", "filesystem"]
 description= "A library for extending `Path` and `PathBuf` in order to parse the path which contains dots."
 readme = "README.md"
 license = "MIT"
+include = ["src/**/*", "Cargo.toml", "benches/bench.rs"]
 
 [badges.travis-ci]
 repository = "magiclen/path-dedot"
