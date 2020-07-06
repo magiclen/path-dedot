@@ -210,7 +210,7 @@ impl ParseDot for Path {
                                     path_string.push(MAIN_SEPARATOR.as_os_str());
                                 }
 
-                                for &token in iter.take(tokens_length - 3) {
+                                for token in iter.take(tokens_length - 3) {
                                     path_string.push(token);
 
                                     path_string.push(MAIN_SEPARATOR.as_os_str());
@@ -224,7 +224,7 @@ impl ParseDot for Path {
                             path_string.push(MAIN_SEPARATOR.as_os_str());
                         }
 
-                        for &token in iter.take(tokens_length - 2) {
+                        for token in iter.take(tokens_length - 2) {
                             path_string.push(token);
 
                             path_string.push(MAIN_SEPARATOR.as_os_str());
