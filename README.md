@@ -176,6 +176,12 @@ println!("{}", p.parse_dot().unwrap().to_str().unwrap());
 cargo bench
 ```
 
+#### once_cell_cache
+
+```bash
+cargo bench --features once_cell_cache
+```
+
 #### lazy_static_cache
 
 ```bash

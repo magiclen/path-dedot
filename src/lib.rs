@@ -189,6 +189,12 @@ println!("{}", p.parse_dot().unwrap().to_str().unwrap());
 cargo bench
 ```
 
+#### once_cell_cache
+
+```bash
+cargo bench --features once_cell_cache
+```
+
 #### lazy_static_cache
 
 ```bash
@@ -203,11 +209,15 @@ cargo bench --features unsafe_cache
 
 */
 
-#[cfg(all(feature = "lazy_static_cache", feature = "unsafe_cache"))]
+#[cfg(all(feature = "once_cell_cache", feature = "lazy_static_cache", feature = "unsafe_cache"))]
 compile_error!("You can only enable at most one caching mechanism for `path-dedot`.");
 
+#[cfg(feature = "lazy_static_cache")]
 #[macro_use]
 extern crate lazy_static;
+
+#[cfg(not(feature = "lazy_static_cache"))]
+extern crate once_cell;
 
 use std::borrow::Cow;
 use std::ffi::OsString;
@@ -228,13 +238,22 @@ mod windows;
 #[cfg(feature = "unsafe_cache")]
 mod unsafe_cwd;
 
+#[cfg(not(feature = "lazy_static_cache"))]
+use once_cell::sync::Lazy;
+
 pub use parse_dot::*;
 
 #[cfg(windows)]
 pub use windows::ParsePrefix;
 
+#[cfg(not(feature = "lazy_static_cache"))]
+/// The main separator for the target OS.
+pub static MAIN_SEPARATOR: Lazy<OsString> =
+    Lazy::new(|| OsString::from(path::MAIN_SEPARATOR.to_string()));
+
+#[cfg(feature = "lazy_static_cache")]
 lazy_static! {
-    /// The main separator for the target OS.
+    /// Current working directory.
     pub static ref MAIN_SEPARATOR: OsString = OsString::from(path::MAIN_SEPARATOR.to_string());
 }
 
@@ -245,6 +264,10 @@ impl ParseDot for PathBuf {
     }
 }
 
+#[cfg(feature = "once_cell_cache")]
+/// Current working directory.
+pub static CWD: Lazy<PathBuf> = Lazy::new(|| std::env::current_dir().unwrap());
+
 #[cfg(feature = "lazy_static_cache")]
 lazy_static! {
     /// Current working directory.
@@ -252,6 +275,7 @@ lazy_static! {
 }
 
 #[cfg(feature = "unsafe_cache")]
+/// Current working directory.
 pub static mut CWD: unsafe_cwd::UnsafeCWD = unsafe_cwd::UnsafeCWD::new();
 
 #[cfg(feature = "unsafe_cache")]
