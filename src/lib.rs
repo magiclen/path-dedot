@@ -209,7 +209,11 @@ cargo bench --features unsafe_cache
 
 */
 
-#[cfg(all(feature = "once_cell_cache", feature = "lazy_static_cache", feature = "unsafe_cache"))]
+#[cfg(any(
+    all(feature = "lazy_static_cache", feature = "unsafe_cache"),
+    all(feature = "once_cell_cache", feature = "unsafe_cache"),
+    all(feature = "lazy_static_cache", feature = "once_cell_cache")
+))]
 compile_error!("You can only enable at most one caching mechanism for `path-dedot`.");
 
 #[cfg(feature = "lazy_static_cache")]
