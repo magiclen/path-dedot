@@ -122,6 +122,16 @@ By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD e
 
 In order to parse paths with better performance, this crate provides two ways to cache the CWD.
 
+### once_cell_cache
+
+Enabling the `once_cell_cache` feature can let this crate use `once_cell` to cache the CWD. It's thread-safe and does not need to modify any code, but once the CWD is cached, it cannot be changed anymore at runtime.
+
+```toml
+[dependencies.path-dedot]
+version = "*"
+features = ["once_cell_cache"]
+```
+
 ### lazy_static_cache
 
 Enabling the `lazy_static_cache` feature can let this crate use `lazy_static` to cache the CWD. It's thread-safe and does not need to modify any code, but once the CWD is cached, it cannot be changed anymore at runtime.
