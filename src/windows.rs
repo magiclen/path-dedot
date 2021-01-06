@@ -137,7 +137,8 @@ impl ParseDot for Path {
                                 tokens.push(token);
                             }
 
-                            size += cwd_parent.as_os_str().len() - 2;
+                            size += cwd_parent.as_os_str().len();
+                            size -= 2;
                         }
                         None => {
                             let prefix = cwd.get_path_prefix().unwrap().as_os_str();
@@ -234,7 +235,7 @@ impl ParseDot for Path {
                     }
                 }
 
-                debug_assert!(size >= path_string.len()); // `\\server\share` -> `\\server\share\` doesn't has dots
+                debug_assert!(size + 1 >= path_string.len()); // +1 to avoid the ending slash missing
 
                 let path_buf = PathBuf::from(path_string);
 
