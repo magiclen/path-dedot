@@ -99,69 +99,97 @@ fn dedot_lv0_4() {
 
 #[test]
 fn dedot_lv1_1() {
+    let p = Path::new(r"\path\to\123\456\.\777");
+
+    assert_eq!(r"\path\to\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv1_2() {
+    let p = Path::new(r"C:\path\to\123\456\.\777");
+
+    assert_eq!(r"C:\path\to\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv2_1() {
+    let p = Path::new(r"\path\to\123\456\..\777");
+
+    assert_eq!(r"\path\to\123\777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv2_2() {
+    let p = Path::new(r"C:\path\to\123\456\..\777");
+
+    assert_eq!(r"C:\path\to\123\777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv3_1() {
     let p = Path::new(r"\path\to\..\123\456\.\777");
 
     assert_eq!(r"\path\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv1_2() {
+fn dedot_lv3_2() {
     let p = Path::new(r"C:\path\to\..\123\456\.\777");
 
     assert_eq!(r"C:\path\123\456\777", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv2_1() {
+fn dedot_lv4_1() {
     let p = Path::new(r"\path\to\..\123\456\.\777\..");
 
     assert_eq!(r"\path\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv2_2() {
+fn dedot_lv4_2() {
     let p = Path::new(r"C:\path\to\..\123\456\.\777\..");
 
     assert_eq!(r"C:\path\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv3_1() {
+fn dedot_lv5_1() {
     let p = Path::new(r"path\to\..\123\456\.\777\..");
 
     assert_eq!(r"path\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv3_2() {
+fn dedot_lv5_2() {
     let p = Path::new(r"C:path\to\..\123\456\.\777\..");
 
     assert_eq!(r"C:path\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv4_1() {
+fn dedot_lv6_1() {
     let p = Path::new(r"path\to\..\..\..\..\123\456\.\777\..");
 
     assert_eq!(r"123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv4_2() {
+fn dedot_lv6_2() {
     let p = Path::new(r"C:path\to\..\..\..\..\123\456\.\777\..");
 
     assert_eq!(r"C:123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv5_1() {
+fn dedot_lv7_1() {
     let p = Path::new(r"\path\to\..\..\..\..\123\456\.\777\..");
 
     assert_eq!(r"\123\456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv5_2() {
+fn dedot_lv7_2() {
     let p = Path::new(r"C:\path\to\..\..\..\..\123\456\.\777\..");
 
     assert_eq!(r"C:\123\456", p.parse_dot().unwrap().to_str().unwrap());

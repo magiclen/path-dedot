@@ -45,34 +45,48 @@ fn dedot_lv0_2() {
 
 #[test]
 fn dedot_lv1() {
+    let p = Path::new("/path/to/123/456/./777");
+
+    assert_eq!("/path/to/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv2() {
+    let p = Path::new("/path/to/123/456/../777");
+
+    assert_eq!("/path/to/123/777", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv3() {
     let p = Path::new("/path/to/../123/456/./777");
 
     assert_eq!("/path/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv2() {
+fn dedot_lv4() {
     let p = Path::new("/path/to/../123/456/./777/..");
 
     assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv3() {
+fn dedot_lv5() {
     let p = Path::new("path/to/../123/456/./777/..");
 
     assert_eq!("path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv4() {
+fn dedot_lv6() {
     let p = Path::new("path/to/../../../../123/456/./777/..");
 
     assert_eq!("123/456", p.parse_dot().unwrap().to_str().unwrap());
 }
 
 #[test]
-fn dedot_lv5() {
+fn dedot_lv7() {
     let p = Path::new("/path/to/../../../../123/456/./777/..");
 
     assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
