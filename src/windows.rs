@@ -249,13 +249,8 @@ impl ParsePrefix for Path {
     #[inline]
     fn get_path_prefix(&self) -> Option<PrefixComponent> {
         match self.components().next() {
-            Some(first_component) => {
-                match first_component {
-                    Component::Prefix(prefix_component) => Some(prefix_component),
-                    _ => None,
-                }
-            }
-            None => None,
+            Some(Component::Prefix(prefix_component)) => Some(prefix_component),
+            _ => None,
         }
     }
 }
