@@ -7,8 +7,6 @@ use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
-        let mut size = self.as_os_str().len();
-
         let mut iter = self.components();
 
         let mut has_dots = false;
@@ -36,15 +34,11 @@ impl ParseDot for Path {
 
                                 if let Some(token) = cwd_iter.next() {
                                     tokens.push(token);
-                                    size += token.len();
 
                                     for token in cwd_iter {
                                         tokens.push(token);
-                                        size += token.len() + 1;
                                     }
                                 }
-
-                                size -= 1;
 
                                 has_dots = true;
 
@@ -57,20 +51,14 @@ impl ParseDot for Path {
 
                                         if let Some(token) = cwd_parent_iter.next() {
                                             tokens.push(token);
-                                            size += token.len();
 
                                             for token in cwd_parent_iter {
                                                 tokens.push(token);
-                                                size += token.len() + 1;
                                             }
                                         }
-
-                                        size -= 2;
                                     }
                                     None => {
                                         tokens.push(MAIN_SEPARATOR.as_os_str());
-
-                                        size -= 1;
                                     }
                                 }
 
@@ -88,15 +76,11 @@ impl ParseDot for Path {
 
                                     if let Some(token) = cwd_iter.next() {
                                         tokens.push(token);
-                                        size += token.len();
 
                                         for token in cwd_iter {
                                             tokens.push(token);
-                                            size += token.len() + 1;
                                         }
                                     }
-
-                                    size -= 1;
 
                                     tokens.push(second_component.as_os_str());
 
@@ -124,8 +108,6 @@ impl ParseDot for Path {
                         tokens.push(token);
                     }
 
-                    size += cwd.as_os_str().len() - 1;
-
                     has_dots = true;
 
                     (true, true)
@@ -136,17 +118,12 @@ impl ParseDot for Path {
                             for token in cwd_parent.iter() {
                                 tokens.push(token);
                             }
-
-                            size += cwd_parent.as_os_str().len();
-                            size -= 2;
                         }
                         None => {
                             let prefix = cwd.get_path_prefix().unwrap().as_os_str();
                             tokens.push(prefix);
-                            size += prefix.len();
 
                             tokens.push(MAIN_SEPARATOR.as_os_str());
-                            size -= 1;
                         }
                     }
 
@@ -165,8 +142,6 @@ impl ParseDot for Path {
                 match component {
                     Component::CurDir => {
                         // may be unreachable
-                        size -= 2;
-
                         has_dots = true;
                     }
                     Component::ParentDir => {
@@ -176,10 +151,7 @@ impl ParseDot for Path {
                             && ((tokens_length != 1 || (!first_is_root && !has_prefix))
                                 && (tokens_length != 2 || !(first_is_root && has_prefix)))
                         {
-                            let removed = tokens.remove(tokens_length - 1);
-                            size -= removed.len() + 4; // xxx\..\
-                        } else {
-                            size -= 3; // ..\
+                            tokens.remove(tokens_length - 1);
                         }
 
                         has_dots = true;
@@ -190,16 +162,30 @@ impl ParseDot for Path {
                 }
             }
 
-            debug_assert!(!tokens.is_empty());
+            let tokens_length = tokens.len();
 
-            if has_dots {
+            debug_assert!(tokens_length > 0);
+
+            let mut size = tokens.iter().fold(tokens_length - 1, |acc, &x| acc + x.len());
+
+            if has_prefix {
+                if tokens_length > 1 {
+                    size -= 1;
+
+                    if first_is_root && tokens_length > 2 {
+                        size -= 1;
+                    }
+                }
+            } else if first_is_root && tokens_length > 1 {
+                size -= 1;
+            }
+
+            if has_dots || size != self.as_os_str().len() {
                 let mut path_string = OsString::with_capacity(size);
 
                 let mut iter = tokens.iter();
 
                 path_string.push(iter.next().unwrap());
-
-                let tokens_length = tokens.len();
 
                 if tokens_length > 1 {
                     if has_prefix {
@@ -234,8 +220,6 @@ impl ParseDot for Path {
                         path_string.push(tokens[tokens_length - 1]);
                     }
                 }
-
-                debug_assert!(size + 1 >= path_string.len()); // +1 to avoid the ending slash missing
 
                 let path_buf = PathBuf::from(path_string);
 
