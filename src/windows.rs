@@ -172,8 +172,16 @@ impl ParseDot for Path {
                 if tokens_length > 1 {
                     size -= 1;
 
-                    if first_is_root && tokens_length > 2 {
-                        size -= 1;
+                    if first_is_root {
+                        if tokens_length > 2 {
+                            size -= 1;
+                        } else if tokens[0].len() == self.as_os_str().len() {
+                            // tokens_length == 2
+                            // e.g.
+                            // `\\server\share\` -> `\\server\share\`
+                            // `\\server\share` -> `\\server\share\` should still be `\\server\share`
+                            return Ok(Cow::from(self));
+                        }
                     }
                 }
             } else if first_is_root && tokens_length > 1 {
