@@ -7,7 +7,6 @@ use std::path::Path;
 
 use path_dedot::{update_cwd, ParseDot, ParsePrefix};
 
-#[ignore]
 #[test]
 fn dedot_after_updating_cwd() {
     unsafe {
