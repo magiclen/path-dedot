@@ -71,7 +71,8 @@ impl ParseDot for Path {
                                     io::Error::new(ErrorKind::Other, "The path is not valid UTF-8.")
                                 })?;
 
-                                if path_str[first_component.as_os_str().len()..].starts_with(r".\") {
+                                if path_str[first_component.as_os_str().len()..].starts_with(r".\")
+                                {
                                     let mut cwd_iter = cwd.iter().skip(1);
 
                                     if let Some(token) = cwd_iter.next() {
@@ -149,7 +150,7 @@ impl ParseDot for Path {
 
                         if tokens_length > 0
                             && ((tokens_length != 1 || (!first_is_root && !has_prefix))
-                            && (tokens_length != 2 || !(first_is_root && has_prefix)))
+                                && (tokens_length != 2 || !(first_is_root && has_prefix)))
                         {
                             tokens.remove(tokens_length - 1);
                         }
