@@ -60,5 +60,5 @@ jobs:
       - run: cargo test --features once_cell_cache
       - run: cargo doc --features once_cell_cache
       - run: cargo build --features unsafe_cache
-      - run: cargo test --features unsafe_cache
+      - run: cargo test --features unsafe_cache dedot_after_updating_cwd
       - run: cargo doc --features unsafe_cache
