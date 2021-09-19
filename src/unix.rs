@@ -6,8 +6,10 @@ use std::path::{Component, Path, PathBuf};
 use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
+    #[inline]
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
         let cwd = get_cwd!();
+
         self.parse_dot_from(&cwd)
     }
 
