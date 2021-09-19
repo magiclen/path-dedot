@@ -276,6 +276,11 @@ impl ParseDot for PathBuf {
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
         self.as_path().parse_dot()
     }
+
+    #[inline]
+    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {
+        self.as_path().parse_dot_from(cwd)
+    }
 }
 
 #[cfg(feature = "once_cell_cache")]

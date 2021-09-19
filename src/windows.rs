@@ -7,13 +7,16 @@ use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
+        let cwd = get_cwd!();
+        self.parse_dot_from(&cwd)
+    }
+
+    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {
         let mut iter = self.components();
 
         let mut has_dots = false;
 
         if let Some(first_component) = iter.next() {
-            let cwd = get_cwd!();
-
             let mut tokens = Vec::new();
 
             let (has_prefix, first_is_root) = match first_component {
