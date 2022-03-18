@@ -10,7 +10,7 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
         let cwd = get_cwd!();
 
-        self.parse_dot_from(&cwd)
+        self.parse_dot_from(cwd.as_ref())
     }
 
     fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {

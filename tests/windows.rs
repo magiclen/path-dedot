@@ -1,7 +1,5 @@
 #![cfg(all(windows, not(feature = "unsafe_cache")))]
 
-extern crate path_dedot;
-
 use std::env;
 use std::path::Path;
 

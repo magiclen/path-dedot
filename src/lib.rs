@@ -10,8 +10,6 @@ Please read the following examples to know the parsing rules.
 If a path starts with a single dot, the dot means your program's **current working directory** (CWD).
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 use std::env;
 
@@ -26,8 +24,6 @@ assert_eq!(Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/
 If a path starts with a pair of dots, the dots means the parent of the CWD. If the CWD is **root**, the parent is still **root**.
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 use std::env;
 
@@ -54,8 +50,6 @@ match cwd_parent {
 In addition to starting with, the **Single Dot** and **Double Dots** can also be placed to other positions. **Single Dot** means noting and will be ignored. **Double Dots** means the parent.
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;
@@ -68,8 +62,6 @@ assert_eq!("/path/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
 ```
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;
@@ -84,8 +76,6 @@ assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 You should notice that `parse_dot` method does **not** aim to get an **absolute path**. A path which does not start with a `MAIN_SEPARATOR`, **Single Dot** and **Double Dots**, will not have each of them after the `parse_dot` method is used.
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;
@@ -100,8 +90,6 @@ assert_eq!("path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 **Double Dots** which is not placed at the start cannot get the parent beyond the original path. Why not? With this constraint, you can insert an absolute path to the start as a virtual root in order to protect your file system from being exposed.
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;
@@ -114,8 +102,6 @@ assert_eq!("123/456", p.parse_dot().unwrap().to_str().unwrap());
 ```
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;
@@ -166,8 +152,6 @@ features = ["unsafe_cache"]
 ```
 
 ```rust
-extern crate path_dedot;
-
 use std::path::Path;
 
 use path_dedot::*;

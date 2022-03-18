@@ -1,7 +1,5 @@
 #![cfg(all(unix, not(feature = "unsafe_cache")))]
 
-extern crate path_dedot;
-
 use std::env;
 use std::path::Path;
 
@@ -30,7 +28,7 @@ fn dedot_lv0_2() {
     match cwd_parent {
         Some(cwd_parent) => {
             assert_eq!(
-                Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(),
+                cwd_parent.join("path/to/123/456").to_str().unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
         }
