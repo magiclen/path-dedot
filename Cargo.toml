@@ -1,6 +1,6 @@
 [package]
 name = "path-dedot"
-version = "3.0.15"
+version = "3.0.16"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
 repository = "https://github.com/magiclen/path-dedot"

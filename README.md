@@ -106,16 +106,16 @@ assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 
 With the `parse_dot_from` function, you can provide the current working directory that the relative paths should be resolved from.
 
-```rs
-use std::path::Path;
+```rust
 use std::env;
+use std::path::Path;
 
 use path_dedot::*;
 
 let p = Path::new("../path/to/123/456");
 let cwd = env::current_dir().unwrap();
 
-println!("{}", p.parse_dot_from(cwd).unwrap().to_str().unwrap());
+println!("{}", p.parse_dot_from(&cwd).unwrap().to_str().unwrap());
 ```
 
 ## Caching
