@@ -35,14 +35,8 @@ impl ParseDot for Path {
                             Component::CurDir => {
                                 // may be unreachable
 
-                                let mut cwd_iter = cwd.iter().skip(1);
-
-                                if let Some(token) = cwd_iter.next() {
+                                for token in cwd.iter().skip(1) {
                                     tokens.push(token);
-
-                                    for token in cwd_iter {
-                                        tokens.push(token);
-                                    }
                                 }
 
                                 has_dots = true;
@@ -52,14 +46,8 @@ impl ParseDot for Path {
                             Component::ParentDir => {
                                 match cwd.parent() {
                                     Some(cwd_parent) => {
-                                        let mut cwd_parent_iter = cwd_parent.iter().skip(1);
-
-                                        if let Some(token) = cwd_parent_iter.next() {
+                                        for token in cwd_parent.iter().skip(1) {
                                             tokens.push(token);
-
-                                            for token in cwd_parent_iter {
-                                                tokens.push(token);
-                                            }
                                         }
                                     }
                                     None => {
@@ -78,14 +66,8 @@ impl ParseDot for Path {
 
                                 if path_str[first_component.as_os_str().len()..].starts_with(r".\")
                                 {
-                                    let mut cwd_iter = cwd.iter().skip(1);
-
-                                    if let Some(token) = cwd_iter.next() {
+                                    for token in cwd.iter().skip(1) {
                                         tokens.push(token);
-
-                                        for token in cwd_iter {
-                                            tokens.push(token);
-                                        }
                                     }
 
                                     tokens.push(second_component.as_os_str());
