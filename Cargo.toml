@@ -23,6 +23,7 @@ bencher = "0.1.5"
 once_cell_cache = []
 lazy_static_cache = ["lazy_static"]
 unsafe_cache = []
+use_unix_paths_on_wasm = []
 
 [[bench]]
 name = "bench"
