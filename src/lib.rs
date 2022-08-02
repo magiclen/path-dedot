@@ -243,7 +243,7 @@ mod parse_dot;
 #[macro_use]
 mod macros;
 
-#[cfg(unix)]
+#[cfg(any(unix, all(target_family = "wasm", feature = "use_unix_paths_on_wasm")))]
 mod unix;
 
 #[cfg(windows)]
