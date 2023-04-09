@@ -3,6 +3,7 @@ name = "path-dedot"
 version = "3.0.18"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
+rust-version = "1.56"
 repository = "https://github.com/magiclen/path-dedot"
 homepage = "https://magiclen.org/path-dedot"
 keywords = ["path", "dot", "dedot", "absolute", "canonical"]

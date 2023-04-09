@@ -1,6 +1,4 @@
-use std::env;
-use std::ops::Deref;
-use std::path::PathBuf;
+use std::{env, ops::Deref, path::PathBuf};
 
 /// Current working directory.
 #[doc(hidden)]
@@ -12,7 +10,7 @@ impl UnsafeCWD {
     #[inline]
     pub(crate) const fn new() -> UnsafeCWD {
         UnsafeCWD {
-            path: None,
+            path: None
         }
     }
 

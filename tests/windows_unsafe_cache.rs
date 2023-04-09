@@ -1,7 +1,6 @@
 #![cfg(all(windows, feature = "unsafe_cache"))]
 
-use std::env;
-use std::path::Path;
+use std::{env, path::Path};
 
 use path_dedot::{update_cwd, ParseDot, ParsePrefix};
 

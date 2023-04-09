@@ -1,7 +1,9 @@
-use std::borrow::Cow;
-use std::ffi::OsString;
-use std::io::{self, ErrorKind};
-use std::path::{Component, Path, PathBuf, PrefixComponent};
+use std::{
+    borrow::Cow,
+    ffi::OsString,
+    io::{self, ErrorKind},
+    path::{Component, Path, PathBuf, PrefixComponent},
+};
 
 use crate::{ParseDot, MAIN_SEPARATOR};
 
@@ -31,7 +33,7 @@ impl ParseDot for Path {
                                 tokens.push(MAIN_SEPARATOR.as_os_str());
 
                                 (true, true)
-                            }
+                            },
                             Component::CurDir => {
                                 // may be unreachable
 
@@ -42,23 +44,23 @@ impl ParseDot for Path {
                                 has_dots = true;
 
                                 (true, true)
-                            }
+                            },
                             Component::ParentDir => {
                                 match cwd.parent() {
                                     Some(cwd_parent) => {
                                         for token in cwd_parent.iter().skip(1) {
                                             tokens.push(token);
                                         }
-                                    }
+                                    },
                                     None => {
                                         tokens.push(MAIN_SEPARATOR.as_os_str());
-                                    }
+                                    },
                                 }
 
                                 has_dots = true;
 
                                 (true, true)
-                            }
+                            },
                             _ => {
                                 let path_str = self.as_os_str().to_str().ok_or_else(|| {
                                     io::Error::new(ErrorKind::Other, "The path is not valid UTF-8.")
@@ -80,17 +82,17 @@ impl ParseDot for Path {
 
                                     (true, false)
                                 }
-                            }
+                            },
                         }
                     } else {
                         (true, false)
                     }
-                }
+                },
                 Component::RootDir => {
                     tokens.push(MAIN_SEPARATOR.as_os_str());
 
                     (false, true)
-                }
+                },
                 Component::CurDir => {
                     for token in cwd.iter() {
                         tokens.push(token);
@@ -99,31 +101,31 @@ impl ParseDot for Path {
                     has_dots = true;
 
                     (true, true)
-                }
+                },
                 Component::ParentDir => {
                     match cwd.parent() {
                         Some(cwd_parent) => {
                             for token in cwd_parent.iter() {
                                 tokens.push(token);
                             }
-                        }
+                        },
                         None => {
                             let prefix = cwd.get_path_prefix().unwrap().as_os_str();
                             tokens.push(prefix);
 
                             tokens.push(MAIN_SEPARATOR.as_os_str());
-                        }
+                        },
                     }
 
                     has_dots = true;
 
                     (true, true)
-                }
+                },
                 Component::Normal(token) => {
                     tokens.push(token);
 
                     (false, false)
-                }
+                },
             };
 
             for component in iter {
@@ -131,7 +133,7 @@ impl ParseDot for Path {
                     Component::CurDir => {
                         // may be unreachable
                         has_dots = true;
-                    }
+                    },
                     Component::ParentDir => {
                         let tokens_length = tokens.len();
 
@@ -143,10 +145,10 @@ impl ParseDot for Path {
                         }
 
                         has_dots = true;
-                    }
+                    },
                     _ => {
                         tokens.push(component.as_os_str());
-                    }
+                    },
                 }
             }
 

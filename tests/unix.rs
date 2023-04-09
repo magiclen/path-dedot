@@ -1,7 +1,6 @@
 #![cfg(all(unix, not(feature = "unsafe_cache")))]
 
-use std::env;
-use std::path::Path;
+use std::{env, path::Path};
 
 use path_dedot::ParseDot;
 
@@ -31,13 +30,13 @@ fn dedot_lv0_2() {
                 cwd_parent.join("path/to/123/456").to_str().unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
         None => {
             assert_eq!(
                 Path::join(Path::new("/"), Path::new("path/to/123/456")).to_str().unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
     }
 }
 

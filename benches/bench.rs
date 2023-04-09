@@ -1,8 +1,7 @@
-use path_dedot::ParseDot;
-
 use std::path::Path;
 
 use bencher::{benchmark_group, benchmark_main, Bencher};
+use path_dedot::ParseDot;
 
 fn no_dots(bencher: &mut Bencher) {
     #[cfg(feature = "unsafe_cache")]

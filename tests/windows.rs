@@ -1,7 +1,6 @@
 #![cfg(all(windows, not(feature = "unsafe_cache")))]
 
-use std::env;
-use std::path::Path;
+use std::{env, path::Path};
 
 use path_dedot::{ParseDot, ParsePrefix};
 
@@ -31,7 +30,7 @@ fn dedot_lv0_2() {
                 Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
         None => {
             assert_eq!(
                 Path::join(
@@ -42,7 +41,7 @@ fn dedot_lv0_2() {
                 .unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
     }
 }
 
@@ -80,7 +79,7 @@ fn dedot_lv0_4() {
                 Path::join(&cwd_parent, Path::new(r"path\to\123\456")).to_str().unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
         None => {
             assert_eq!(
                 Path::join(
@@ -91,7 +90,7 @@ fn dedot_lv0_4() {
                 .unwrap(),
                 p.parse_dot().unwrap().to_str().unwrap()
             );
-        }
+        },
     }
 }
 

@@ -233,10 +233,12 @@ extern crate lazy_static;
 #[cfg(not(feature = "lazy_static_cache"))]
 extern crate once_cell;
 
-use std::borrow::Cow;
-use std::ffi::OsString;
-use std::io;
-use std::path::{self, Path, PathBuf};
+use std::{
+    borrow::Cow,
+    ffi::OsString,
+    io,
+    path::{self, Path, PathBuf},
+};
 
 mod parse_dot;
 
@@ -254,9 +256,7 @@ mod unsafe_cwd;
 
 #[cfg(not(feature = "lazy_static_cache"))]
 use once_cell::sync::Lazy;
-
 pub use parse_dot::*;
-
 #[cfg(windows)]
 pub use windows::ParsePrefix;
 
