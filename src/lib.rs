@@ -17,6 +17,12 @@ use path_dedot::*;
 
 let p = Path::new("./path/to/123/456");
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!(Path::join(env::current_dir().unwrap().as_path(), Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
@@ -36,6 +42,12 @@ let cwd = env::current_dir().unwrap();
 let cwd_parent = cwd.parent();
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 match cwd_parent {
    Some(cwd_parent) => {
       assert_eq!(Path::join(&cwd_parent, Path::new("path/to/123/456")).to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
@@ -57,6 +69,12 @@ use path_dedot::*;
 let p = Path::new("/path/to/../123/456/./777");
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!("/path/123/456/777", p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
@@ -69,6 +87,12 @@ use path_dedot::*;
 let p = Path::new("/path/to/../123/456/./777/..");
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!("/path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
@@ -83,6 +107,12 @@ use path_dedot::*;
 let p = Path::new("path/to/../123/456/./777/..");
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!("path/123/456", p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
@@ -97,6 +127,12 @@ use path_dedot::*;
 let p = Path::new("path/to/../../../../123/456/./777/..");
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!("123/456", p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
@@ -109,6 +145,12 @@ use path_dedot::*;
 let p = Path::new("/path/to/../../../../123/456/./777/..");
 
 # if cfg!(unix) {
+# #[cfg(feature = "unsafe_cache")]
+# {
+#     unsafe {
+#         update_cwd();
+#     }
+# }
 assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 # }
 ```
