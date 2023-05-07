@@ -46,8 +46,6 @@ fn dedot_lv0_2() {
 }
 
 #[test]
-#[ignore]
-// Ignored because it may not be standard
 fn dedot_lv0_3() {
     let cwd = env::current_dir().unwrap();
 
@@ -62,8 +60,6 @@ fn dedot_lv0_3() {
 }
 
 #[test]
-#[ignore]
-// Ignored because it may not be standard
 fn dedot_lv0_4() {
     let cwd = env::current_dir().unwrap();
 
@@ -190,6 +186,132 @@ fn dedot_lv7_2() {
     let p = Path::new(r"C:\path\to\..\..\..\..\123\456\.\777\..");
 
     assert_eq!(r"C:\123\456", p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_1() {
+    let p = Path::new(r"C:\");
+
+    assert_eq!(r"C:\", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_2() {
+    let p = Path::new(r"C:");
+
+    assert_eq!(r"C:", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_3() {
+    let p = Path::new(r"");
+
+    assert_eq!(r"", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_4() {
+    let p = Path::new(r"abc");
+
+    assert_eq!(r"abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_1() {
+    let p = Path::new(r".\abc");
+
+    assert_eq!(r"\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_2() {
+    let p = Path::new(r"..\abc");
+
+    assert_eq!(r"\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_3() {
+    let p = Path::new(r".\abc");
+
+    assert_eq!(r"\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+
+    assert_eq!(
+        r"C:\foo\bar\baz\abc",
+        p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap()
+    );
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_4() {
+    let p = Path::new(r"..\abc");
+
+    assert_eq!(r"\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_5() {
+    let p = Path::new(r"C:.\abc");
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_6() {
+    let p = Path::new(r"C:..\abc");
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_7() {
+    let p = Path::new(r"C:.\abc");
+
+    assert_eq!(r"C:\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+
+    assert_eq!(
+        r"C:\foo\bar\baz\abc",
+        p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap()
+    );
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_8() {
+    let p = Path::new(r"C:..\abc");
+
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
 }
 
 #[test]

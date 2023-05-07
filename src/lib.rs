@@ -168,7 +168,7 @@ use path_dedot::*;
 let p = Path::new("../path/to/123/456");
 let cwd = env::current_dir().unwrap();
 
-println!("{}", p.parse_dot_from(&cwd).unwrap().to_str().unwrap());
+println!("{}", p.parse_dot_from(cwd).unwrap().to_str().unwrap());
 ```
 
 ## Caching
@@ -320,7 +320,7 @@ impl ParseDot for PathBuf {
     }
 
     #[inline]
-    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>> {
         self.as_path().parse_dot_from(cwd)
     }
 }

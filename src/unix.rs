@@ -12,10 +12,10 @@ impl ParseDot for Path {
     fn parse_dot(&self) -> io::Result<Cow<Path>> {
         let cwd = get_cwd!();
 
-        self.parse_dot_from(cwd.as_ref())
+        self.parse_dot_from(cwd)
     }
 
-    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>> {
         let mut iter = self.components();
 
         let mut has_dots = false;
@@ -30,29 +30,40 @@ impl ParseDot for Path {
                     true
                 },
                 Component::CurDir => {
+                    has_dots = true;
+
+                    let cwd = cwd.as_ref();
+
                     for token in cwd.iter() {
                         tokens.push(token);
                     }
 
-                    has_dots = true;
-
-                    true
+                    !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str()
                 },
                 Component::ParentDir => {
+                    has_dots = true;
+
+                    let cwd = cwd.as_ref();
+
                     match cwd.parent() {
                         Some(cwd_parent) => {
                             for token in cwd_parent.iter() {
                                 tokens.push(token);
                             }
+
+                            !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str()
                         },
                         None => {
-                            tokens.push(MAIN_SEPARATOR.as_os_str());
+                            // don't care about `cwd` is "//" or "///"
+                            if cwd == MAIN_SEPARATOR.as_os_str() {
+                                tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                true
+                            } else {
+                                false
+                            }
                         },
                     }
-
-                    has_dots = true;
-
-                    true
                 },
                 _ => {
                     tokens.push(first_component.as_os_str());

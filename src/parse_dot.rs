@@ -6,5 +6,5 @@ pub trait ParseDot {
     fn parse_dot(&self) -> io::Result<Cow<Path>>;
 
     /// Remove dots in the path and create a new `PathBuf` instance on demand. It gets the current working directory as the second argument.
-    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>>;
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>>;
 }

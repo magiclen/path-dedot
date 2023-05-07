@@ -15,7 +15,7 @@ impl ParseDot for Path {
         self.parse_dot_from(&cwd)
     }
 
-    fn parse_dot_from(&self, cwd: &Path) -> io::Result<Cow<Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>> {
         let mut iter = self.components();
 
         let mut has_dots = false;
@@ -37,29 +37,60 @@ impl ParseDot for Path {
                             Component::CurDir => {
                                 // may be unreachable
 
-                                for token in cwd.iter().skip(1) {
+                                has_dots = true;
+
+                                let cwd = cwd.as_ref();
+
+                                for token in cwd.iter().skip(if cwd.get_path_prefix().is_some() {
+                                    1
+                                } else {
+                                    0
+                                }) {
                                     tokens.push(token);
                                 }
 
-                                has_dots = true;
-
-                                (true, true)
+                                (true, tokens.len() > 1 && tokens[1] == MAIN_SEPARATOR.as_os_str())
                             },
                             Component::ParentDir => {
-                                match cwd.parent() {
-                                    Some(cwd_parent) => {
-                                        for token in cwd_parent.iter().skip(1) {
-                                            tokens.push(token);
-                                        }
-                                    },
-                                    None => {
-                                        tokens.push(MAIN_SEPARATOR.as_os_str());
-                                    },
-                                }
-
                                 has_dots = true;
 
-                                (true, true)
+                                let cwd = cwd.as_ref();
+
+                                match cwd.parent() {
+                                    Some(cwd_parent) => {
+                                        for token in cwd_parent.iter().skip(
+                                            if cwd.get_path_prefix().is_some() { 1 } else { 0 },
+                                        ) {
+                                            tokens.push(token);
+                                        }
+
+                                        (
+                                            true,
+                                            tokens.len() > 1
+                                                && tokens[1] == MAIN_SEPARATOR.as_os_str(),
+                                        )
+                                    },
+                                    None => {
+                                        if cwd.get_path_prefix().is_some() {
+                                            if cwd.is_absolute() {
+                                                tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                                (true, true)
+                                            } else {
+                                                (true, false)
+                                            }
+                                        } else {
+                                            // don't care about `cwd` is "\\" or "\\\"
+                                            if cwd == MAIN_SEPARATOR.as_os_str() {
+                                                tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                                (true, true)
+                                            } else {
+                                                (true, false)
+                                            }
+                                        }
+                                    },
+                                }
                             },
                             _ => {
                                 let path_str = self.as_os_str().to_str().ok_or_else(|| {
@@ -68,15 +99,28 @@ impl ParseDot for Path {
 
                                 if path_str[first_component.as_os_str().len()..].starts_with(r".\")
                                 {
-                                    for token in cwd.iter().skip(1) {
-                                        tokens.push(token);
-                                    }
+                                    has_dots = true;
+
+                                    let out =
+                                        {
+                                            let cwd = cwd.as_ref();
+
+                                            for token in cwd.iter().skip(
+                                                if cwd.get_path_prefix().is_some() { 1 } else { 0 },
+                                            ) {
+                                                tokens.push(token);
+                                            }
+
+                                            (
+                                                true,
+                                                tokens.len() > 1
+                                                    && tokens[1] == MAIN_SEPARATOR.as_os_str(),
+                                            )
+                                        };
 
                                     tokens.push(second_component.as_os_str());
 
-                                    has_dots = true;
-
-                                    (true, true)
+                                    out
                                 } else {
                                     tokens.push(second_component.as_os_str());
 
@@ -94,32 +138,64 @@ impl ParseDot for Path {
                     (false, true)
                 },
                 Component::CurDir => {
+                    has_dots = true;
+
+                    let cwd = cwd.as_ref();
+
                     for token in cwd.iter() {
                         tokens.push(token);
                     }
 
-                    has_dots = true;
-
-                    (true, true)
+                    if cwd.get_path_prefix().is_some() {
+                        (true, tokens.len() > 1 && tokens[1] == MAIN_SEPARATOR.as_os_str())
+                    } else {
+                        (false, !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str())
+                    }
                 },
                 Component::ParentDir => {
+                    has_dots = true;
+
+                    let cwd = cwd.as_ref();
+
                     match cwd.parent() {
                         Some(cwd_parent) => {
                             for token in cwd_parent.iter() {
                                 tokens.push(token);
                             }
-                        },
-                        None => {
-                            let prefix = cwd.get_path_prefix().unwrap().as_os_str();
-                            tokens.push(prefix);
 
-                            tokens.push(MAIN_SEPARATOR.as_os_str());
+                            if cwd.get_path_prefix().is_some() {
+                                (true, tokens.len() > 1 && tokens[1] == MAIN_SEPARATOR.as_os_str())
+                            } else {
+                                (
+                                    false,
+                                    !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str(),
+                                )
+                            }
+                        },
+                        None => match cwd.get_path_prefix() {
+                            Some(prefix) => {
+                                tokens.push(prefix.as_os_str());
+
+                                if cwd.is_absolute() {
+                                    tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                    (true, true)
+                                } else {
+                                    (true, false)
+                                }
+                            },
+                            None => {
+                                // don't care about `cwd` is "\\" or "\\\"
+                                if cwd == MAIN_SEPARATOR.as_os_str() {
+                                    tokens.push(MAIN_SEPARATOR.as_os_str());
+
+                                    (false, true)
+                                } else {
+                                    (false, false)
+                                }
+                            },
                         },
                     }
-
-                    has_dots = true;
-
-                    (true, true)
                 },
                 Component::Normal(token) => {
                     tokens.push(token);

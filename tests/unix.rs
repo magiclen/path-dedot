@@ -88,3 +88,59 @@ fn dedot_lv7() {
 
     assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 }
+
+#[test]
+fn dedot_lv8_1() {
+    let p = Path::new("/");
+
+    assert_eq!("/", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("/", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_2() {
+    let p = Path::new("");
+
+    assert_eq!("", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv8_3() {
+    let p = Path::new("abc");
+
+    assert_eq!("abc", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_1() {
+    let p = Path::new("./abc");
+
+    assert_eq!("/abc", p.parse_dot_from("/").unwrap().to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_2() {
+    let p = Path::new("../abc");
+
+    assert_eq!("/abc", p.parse_dot_from("/").unwrap().to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_3() {
+    let p = Path::new("./abc");
+
+    assert_eq!("/foo/bar/baz/abc", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("foo/bar/baz/abc", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv9_4() {
+    let p = Path::new("../abc");
+
+    assert_eq!("/foo/bar/abc", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("foo/bar/abc", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}
