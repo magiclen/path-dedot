@@ -228,9 +228,11 @@ impl ParseDot for Path {
                 }
             }
 
-            let tokens_length = tokens.len();
+            if tokens.is_empty() {
+                return Ok(Cow::from(cwd.as_ref().to_path_buf()));
+            }
 
-            debug_assert!(tokens_length > 0);
+            let tokens_length = tokens.len();
 
             let mut size = tokens.iter().fold(tokens_length - 1, |acc, &x| acc + x.len());
 

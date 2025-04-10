@@ -41,6 +41,15 @@ fn dedot_lv0_2() {
 }
 
 #[test]
+fn dedot_lv0_3() {
+    let p = Path::new("path/../..");
+
+    let cwd = env::current_dir().unwrap();
+
+    assert_eq!(cwd.to_str().unwrap(), p.parse_dot().unwrap().to_str().unwrap());
+}
+
+#[test]
 fn dedot_lv1() {
     let p = Path::new("/path/to/123/456/./777");
 
