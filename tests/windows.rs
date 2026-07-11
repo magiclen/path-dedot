@@ -1,4 +1,4 @@
-#![cfg(all(windows, not(feature = "unsafe_cache")))]
+#![cfg(windows)]
 
 use std::{env, path::Path};
 

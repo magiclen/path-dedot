@@ -261,20 +261,6 @@ cargo bench --features unsafe_cache
 
 */
 
-#[cfg(any(
-    all(feature = "lazy_static_cache", feature = "unsafe_cache"),
-    all(feature = "once_cell_cache", feature = "unsafe_cache"),
-    all(feature = "lazy_static_cache", feature = "once_cell_cache")
-))]
-compile_error!("You can only enable at most one caching mechanism for `path-dedot`.");
-
-#[cfg(feature = "lazy_static_cache")]
-#[macro_use]
-extern crate lazy_static;
-
-#[cfg(not(feature = "lazy_static_cache"))]
-extern crate once_cell;
-
 use std::{
     borrow::Cow,
     ffi::OsString,
@@ -287,31 +273,21 @@ mod parse_dot;
 #[macro_use]
 mod macros;
 
-#[cfg(any(unix, all(target_family = "wasm", feature = "use_unix_paths_on_wasm")))]
+#[cfg(any(unix, target_family = "wasm"))]
 mod unix;
 
 #[cfg(windows)]
 mod windows;
 
-#[cfg(feature = "unsafe_cache")]
-mod unsafe_cwd;
+use std::sync::LazyLock;
 
-#[cfg(not(feature = "lazy_static_cache"))]
-use once_cell::sync::Lazy;
 pub use parse_dot::*;
 #[cfg(windows)]
 pub use windows::ParsePrefix;
 
-#[cfg(not(feature = "lazy_static_cache"))]
 /// The main separator for the target OS.
-pub static MAIN_SEPARATOR: Lazy<OsString> =
-    Lazy::new(|| OsString::from(path::MAIN_SEPARATOR.to_string()));
-
-#[cfg(feature = "lazy_static_cache")]
-lazy_static! {
-    /// Current working directory.
-    pub static ref MAIN_SEPARATOR: OsString = OsString::from(path::MAIN_SEPARATOR.to_string());
-}
+pub static MAIN_SEPARATOR: LazyLock<OsString> =
+    LazyLock::new(|| OsString::from(path::MAIN_SEPARATOR.to_string()));
 
 impl ParseDot for PathBuf {
     #[inline]
@@ -325,23 +301,6 @@ impl ParseDot for PathBuf {
     }
 }
 
-#[cfg(feature = "once_cell_cache")]
+#[cfg(feature = "fixed_workdir")]
 /// Current working directory.
-pub static CWD: Lazy<PathBuf> = Lazy::new(|| std::env::current_dir().unwrap());
-
-#[cfg(feature = "lazy_static_cache")]
-lazy_static! {
-    /// Current working directory.
-    pub static ref CWD: PathBuf = std::env::current_dir().unwrap();
-}
-
-#[cfg(feature = "unsafe_cache")]
-/// Current working directory.
-pub static mut CWD: unsafe_cwd::UnsafeCWD = unsafe_cwd::UnsafeCWD::new();
-
-#[cfg(feature = "unsafe_cache")]
-/// Initialize or update the CWD cached in the `path-dedot` crate after using the `std::env::set_current_dir` function. It is not a safe operation. Make sure there is no `parse_dot` method running at this moment.
-#[allow(clippy::missing_safety_doc)]
-pub unsafe fn update_cwd() {
-    CWD.update();
-}
+pub static CWD: LazyLock<PathBuf> = LazyLock::new(|| std::env::current_dir().unwrap());

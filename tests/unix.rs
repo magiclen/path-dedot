@@ -1,4 +1,4 @@
-#![cfg(all(unix, not(feature = "unsafe_cache")))]
+#![cfg(any(unix, target_family = "wasm"))]
 
 use std::{env, path::Path};
 
