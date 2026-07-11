@@ -144,3 +144,11 @@ fn dedot_lv9_4() {
     assert_eq!("/foo/bar/abc", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
     assert_eq!("foo/bar/abc", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
 }
+
+#[test]
+fn dedot_lv10() {
+    let p = Path::new("a/../..");
+
+    assert_eq!("", p.parse_dot_from("/foo/bar/baz").unwrap().to_str().unwrap());
+    assert_eq!("", p.parse_dot_from("foo/bar/baz").unwrap().to_str().unwrap());
+}

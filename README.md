@@ -102,6 +102,18 @@ let p = Path::new("/path/to/../../../../123/456/./777/..");
 assert_eq!("/123/456", p.parse_dot().unwrap().to_str().unwrap());
 ```
 
+If a path is entirely consumed by its **Double Dots**, an empty path will be returned.
+
+```rust
+use std::path::Path;
+
+use path_dedot::*;
+
+let p = Path::new("path/to/../../..");
+
+assert_eq!("", p.parse_dot().unwrap().to_str().unwrap());
+```
+
 ### Starting from a given current working directory
 
 With the `parse_dot_from` function, you can provide the current working directory that the relative paths should be resolved from.
@@ -120,7 +132,7 @@ println!("{}", p.parse_dot_from(cwd).unwrap().to_str().unwrap());
 
 ## Caching
 
-By default, the `parse_dot` method creates a new `PathBuf` instance of the CWD every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
+The `parse_dot` method requires the CWD only when the input path starts with a **Single Dot** or **Double Dots**, and by default, it creates a new `PathBuf` instance of the CWD every time in its operation. The overhead is obvious. Although it allows us to safely change the CWD at runtime by the program itself (e.g. using the `std::env::set_current_dir` function) or outside controls (e.g. using gdb to call `chdir`), we don't need that in most cases.
 
 In order to parse paths with better performance, the `fixed_workdir` feature can be enabled.
 

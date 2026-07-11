@@ -22,9 +22,7 @@ jobs:
           - nightly
         features:
           -
-          - --features lazy_static_cache
-          - --features once_cell_cache
-          - --features unsafe_cache
+          - --features fixed_workdir
     name: Test ${{ matrix.toolchain }} on ${{ matrix.os }} (${{ matrix.features }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -34,6 +32,30 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
       - run: cargo test --release ${{ matrix.features }}
       - run: cargo doc --release ${{ matrix.features }}
+
+  wasm-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - stable
+          - nightly
+        features:
+          -
+          - --features fixed_workdir
+    name: Test ${{ matrix.toolchain }} on wasm32-wasip1 (${{ matrix.features }})
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TARGET_WASM32_WASIP1_RUNNER: wasmtime
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: wasm32-wasip1,wasm32-unknown-unknown
+      - uses: bytecodealliance/actions/wasmtime/setup@v1
+      - run: cargo build --release --target wasm32-unknown-unknown ${{ matrix.features }}
+      - run: cargo test --release --target wasm32-wasip1 ${{ matrix.features }}
 
   MSRV:
     strategy:
@@ -47,9 +69,7 @@ jobs:
           - "1.80"
         features:
           -
-          - --features lazy_static_cache
-          - --features once_cell_cache
-          - --features unsafe_cache
+          - --features fixed_workdir
     name: Test ${{ matrix.toolchain }} on ${{ matrix.os }} (${{ matrix.features }})
     runs-on: ${{ matrix.os }}
     steps:

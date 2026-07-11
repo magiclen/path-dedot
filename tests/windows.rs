@@ -315,6 +315,22 @@ fn dedot_lv9_8() {
 }
 
 #[test]
+fn dedot_lv10_1() {
+    let p = Path::new(r"a\..\..");
+
+    assert_eq!("", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!("", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
+fn dedot_lv10_2() {
+    let p = Path::new(r"C:a\..\..");
+
+    assert_eq!("C:", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!("C:", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+}
+
+#[test]
 fn prefix_1() {
     let p = Path::new(r"C:\");
 

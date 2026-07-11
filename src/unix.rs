@@ -1,21 +1,29 @@
 use std::{
     borrow::Cow,
-    ffi::OsString,
+    ffi::{OsStr, OsString},
     io,
-    path::{Component, Path, PathBuf},
+    path::{Component, Path, PathBuf, MAIN_SEPARATOR_STR},
 };
 
-use crate::{ParseDot, MAIN_SEPARATOR};
+use crate::ParseDot;
 
 impl ParseDot for Path {
     #[inline]
     fn parse_dot(&self) -> io::Result<Cow<'_, Path>> {
-        let cwd = get_cwd!();
+        match self.components().next() {
+            Some(Component::CurDir | Component::ParentDir) => {
+                let cwd = get_cwd!();
 
-        self.parse_dot_from(cwd)
+                self.parse_dot_from(cwd)
+            },
+            // the cwd is only used when the path starts with a single dot or double dots, so an empty path is enough here
+            _ => self.parse_dot_from(Path::new("")),
+        }
     }
 
     fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<'_, Path>> {
+        let main_separator = OsStr::new(MAIN_SEPARATOR_STR);
+
         let mut iter = self.components();
 
         let mut has_dots = false;
@@ -25,7 +33,7 @@ impl ParseDot for Path {
 
             let first_is_root = match first_component {
                 Component::RootDir => {
-                    tokens.push(MAIN_SEPARATOR.as_os_str());
+                    tokens.push(main_separator);
 
                     true
                 },
@@ -38,7 +46,7 @@ impl ParseDot for Path {
                         tokens.push(token);
                     }
 
-                    !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str()
+                    !tokens.is_empty() && tokens[0] == main_separator
                 },
                 Component::ParentDir => {
                     has_dots = true;
@@ -51,12 +59,12 @@ impl ParseDot for Path {
                                 tokens.push(token);
                             }
 
-                            !tokens.is_empty() && tokens[0] == MAIN_SEPARATOR.as_os_str()
+                            !tokens.is_empty() && tokens[0] == main_separator
                         },
                         None => {
                             // don't care about `cwd` is "//" or "///"
-                            if cwd == MAIN_SEPARATOR.as_os_str() {
-                                tokens.push(MAIN_SEPARATOR.as_os_str());
+                            if cwd == main_separator {
+                                tokens.push(main_separator);
 
                                 true
                             } else {
@@ -82,7 +90,7 @@ impl ParseDot for Path {
                         let tokens_length = tokens.len();
 
                         if tokens_length > 0 && (tokens_length != 1 || !first_is_root) {
-                            tokens.remove(tokens_length - 1);
+                            tokens.pop();
                         }
 
                         has_dots = true;
@@ -93,9 +101,12 @@ impl ParseDot for Path {
                 }
             }
 
-            let tokens_length = tokens.len();
+            // all tokens can be removed by double dots (e.g. `a/../..`), and in this case the result is an empty path
+            if tokens.is_empty() {
+                return Ok(Cow::from(PathBuf::new()));
+            }
 
-            debug_assert!(tokens_length > 0);
+            let tokens_length = tokens.len();
 
             let mut size = tokens.iter().fold(tokens_length - 1, |acc, &x| acc + x.len());
 
@@ -112,13 +123,13 @@ impl ParseDot for Path {
 
                 if tokens_length > 1 {
                     if !first_is_root {
-                        path_string.push(MAIN_SEPARATOR.as_os_str());
+                        path_string.push(main_separator);
                     }
 
                     for token in iter.take(tokens_length - 2) {
                         path_string.push(token);
 
-                        path_string.push(MAIN_SEPARATOR.as_os_str());
+                        path_string.push(main_separator);
                     }
 
                     path_string.push(tokens[tokens_length - 1]);
