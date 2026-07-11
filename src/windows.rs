@@ -29,14 +29,14 @@ impl ParseDot for Path {
         if needs_cwd {
             let cwd = get_cwd!();
 
-            self.parse_dot_from(cwd)
+            Ok(self.parse_dot_from(cwd))
         } else {
             // the cwd is only used when the path starts with a single dot or double dots, so an empty path is enough here
-            self.parse_dot_from(Path::new(""))
+            Ok(self.parse_dot_from(Path::new("")))
         }
     }
 
-    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<'_, Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> Cow<'_, Path> {
         let main_separator = OsStr::new(MAIN_SEPARATOR_STR);
 
         let mut iter = self.components();
@@ -112,12 +112,9 @@ impl ParseDot for Path {
                                 }
                             },
                             _ => {
-                                let path_str = self.as_os_str().to_str().ok_or_else(|| {
-                                    io::Error::other("The path is not valid UTF-8.")
-                                })?;
+                                let path = self.as_os_str().as_encoded_bytes();
 
-                                if path_str[first_component.as_os_str().len()..].starts_with(r".\")
-                                {
+                                if path[first_component.as_os_str().len()..].starts_with(br".\") {
                                     has_dots = true;
 
                                     let out =
@@ -242,7 +239,7 @@ impl ParseDot for Path {
 
             // all tokens can be removed by double dots (e.g. `a\..\..`), and in this case the result is an empty path
             if tokens.is_empty() {
-                return Ok(Cow::from(PathBuf::new()));
+                return Cow::from(PathBuf::new());
             }
 
             let tokens_length = tokens.len();
@@ -261,7 +258,7 @@ impl ParseDot for Path {
                             // e.g.
                             // `\\server\share\` -> `\\server\share\`
                             // `\\server\share` -> `\\server\share\` should still be `\\server\share`
-                            return Ok(Cow::from(self));
+                            return Cow::from(self);
                         }
                     }
                 }
@@ -312,12 +309,12 @@ impl ParseDot for Path {
 
                 let path_buf = PathBuf::from(path_string);
 
-                Ok(Cow::from(path_buf))
+                Cow::from(path_buf)
             } else {
-                Ok(Cow::from(self))
+                Cow::from(self)
             }
         } else {
-            Ok(Cow::from(self))
+            Cow::from(self)
         }
     }
 }

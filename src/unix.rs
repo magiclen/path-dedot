@@ -14,14 +14,14 @@ impl ParseDot for Path {
             Some(Component::CurDir | Component::ParentDir) => {
                 let cwd = get_cwd!();
 
-                self.parse_dot_from(cwd)
+                Ok(self.parse_dot_from(cwd))
             },
             // the cwd is only used when the path starts with a single dot or double dots, so an empty path is enough here
-            _ => self.parse_dot_from(Path::new("")),
+            _ => Ok(self.parse_dot_from(Path::new(""))),
         }
     }
 
-    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<'_, Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> Cow<'_, Path> {
         let main_separator = OsStr::new(MAIN_SEPARATOR_STR);
 
         let mut iter = self.components();
@@ -103,7 +103,7 @@ impl ParseDot for Path {
 
             // all tokens can be removed by double dots (e.g. `a/../..`), and in this case the result is an empty path
             if tokens.is_empty() {
-                return Ok(Cow::from(PathBuf::new()));
+                return Cow::from(PathBuf::new());
             }
 
             let tokens_length = tokens.len();
@@ -137,12 +137,12 @@ impl ParseDot for Path {
 
                 let path_buf = PathBuf::from(path_string);
 
-                Ok(Cow::from(path_buf))
+                Cow::from(path_buf)
             } else {
-                Ok(Cow::from(self))
+                Cow::from(self)
             }
         } else {
-            Ok(Cow::from(self))
+            Cow::from(self)
         }
     }
 }

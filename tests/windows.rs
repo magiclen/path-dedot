@@ -192,142 +192,136 @@ fn dedot_lv7_2() {
 fn dedot_lv8_1() {
     let p = Path::new(r"C:\");
 
-    assert_eq!(r"C:\", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:\", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:\", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv8_2() {
     let p = Path::new(r"C:");
 
-    assert_eq!(r"C:", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv8_3() {
     let p = Path::new(r"");
 
-    assert_eq!(r"", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv8_4() {
     let p = Path::new(r"abc");
 
-    assert_eq!(r"abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"abc", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"abc", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_1() {
     let p = Path::new(r".\abc");
 
-    assert_eq!(r"\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
-    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+    assert_eq!(r"\abc", p.parse_dot_from(r"\").to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").to_str().unwrap());
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_2() {
     let p = Path::new(r"..\abc");
 
-    assert_eq!(r"\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
-    assert_eq!("abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+    assert_eq!(r"\abc", p.parse_dot_from(r"\").to_str().unwrap());
+    assert_eq!("abc", p.parse_dot_from("").to_str().unwrap());
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_3() {
     let p = Path::new(r".\abc");
 
-    assert_eq!(r"\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 
-    assert_eq!(
-        r"C:\foo\bar\baz\abc",
-        p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap()
-    );
-    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\baz\abc", p.parse_dot_from(r"C:\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_4() {
     let p = Path::new(r"..\abc");
 
-    assert_eq!(r"\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 
-    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_5() {
     let p = Path::new(r"C:.\abc");
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("").to_str().unwrap());
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_6() {
     let p = Path::new(r"C:..\abc");
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("").to_str().unwrap());
 
-    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").unwrap().to_str().unwrap());
-    assert_eq!("C:abc", p.parse_dot_from("C:").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\abc", p.parse_dot_from(r"C:\").to_str().unwrap());
+    assert_eq!("C:abc", p.parse_dot_from("C:").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_7() {
     let p = Path::new(r"C:.\abc");
 
-    assert_eq!(r"C:\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\baz\abc", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 
-    assert_eq!(
-        r"C:\foo\bar\baz\abc",
-        p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap()
-    );
-    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\baz\abc", p.parse_dot_from(r"C:\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\baz\abc", p.parse_dot_from(r"C:foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv9_8() {
     let p = Path::new(r"C:..\abc");
 
-    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 
-    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!(r"C:\foo\bar\abc", p.parse_dot_from(r"C:\foo\bar\baz").to_str().unwrap());
+    assert_eq!(r"C:foo\bar\abc", p.parse_dot_from(r"C:foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv10_1() {
     let p = Path::new(r"a\..\..");
 
-    assert_eq!("", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!("", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!("", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!("", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
 fn dedot_lv10_2() {
     let p = Path::new(r"C:a\..\..");
 
-    assert_eq!("C:", p.parse_dot_from(r"\foo\bar\baz").unwrap().to_str().unwrap());
-    assert_eq!("C:", p.parse_dot_from(r"foo\bar\baz").unwrap().to_str().unwrap());
+    assert_eq!("C:", p.parse_dot_from(r"\foo\bar\baz").to_str().unwrap());
+    assert_eq!("C:", p.parse_dot_from(r"foo\bar\baz").to_str().unwrap());
 }
 
 #[test]
