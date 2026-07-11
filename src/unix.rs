@@ -9,13 +9,13 @@ use crate::{ParseDot, MAIN_SEPARATOR};
 
 impl ParseDot for Path {
     #[inline]
-    fn parse_dot(&self) -> io::Result<Cow<Path>> {
+    fn parse_dot(&self) -> io::Result<Cow<'_, Path>> {
         let cwd = get_cwd!();
 
         self.parse_dot_from(cwd)
     }
 
-    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<'_, Path>> {
         let mut iter = self.components();
 
         let mut has_dots = false;

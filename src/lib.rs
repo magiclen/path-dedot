@@ -315,12 +315,12 @@ lazy_static! {
 
 impl ParseDot for PathBuf {
     #[inline]
-    fn parse_dot(&self) -> io::Result<Cow<Path>> {
+    fn parse_dot(&self) -> io::Result<Cow<'_, Path>> {
         self.as_path().parse_dot()
     }
 
     #[inline]
-    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<Path>> {
+    fn parse_dot_from(&self, cwd: impl AsRef<Path>) -> io::Result<Cow<'_, Path>> {
         self.as_path().parse_dot_from(cwd)
     }
 }
