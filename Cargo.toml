@@ -10,7 +10,7 @@ keywords = ["path", "dot", "dedot", "absolute", "canonical"]
 categories = ["parser-implementations", "filesystem"]
 description = "A library for extending `Path` and `PathBuf` in order to parse the path which contains dots."
 license = "MIT"
-include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE", "benches/bench.rs"]
+include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
 
 [dependencies]
 once_cell = "1.4"
