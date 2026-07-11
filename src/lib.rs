@@ -156,6 +156,8 @@ cargo bench --features fixed_workdir
 
 */
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 use std::{
     borrow::Cow,
     io,

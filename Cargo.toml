@@ -23,3 +23,7 @@ fixed_workdir = []
 [[bench]]
 name = "bench"
 harness = false
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
